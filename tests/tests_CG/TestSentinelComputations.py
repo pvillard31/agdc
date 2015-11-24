@@ -9,6 +9,7 @@ from datetime import date
 
 from datacube.api.model import DatasetType, Satellite
 from datacube.api.query import  list_tiles_as_list
+from datacube.api.utils import  get_dataset_data
 
 import logging
 
@@ -28,3 +29,6 @@ tiles = list_tiles_as_list(x=x_cell, y=y_cell, acq_min=min_date,
                            dataset_types=dataset_types)
 
 print "Number of time periods: {}".format(len(tiles))
+
+nbar_ds = tiles[0].datasets[DatasetType.SIGMA_VV]
+data = get_dataset_data(nbar_ds)
