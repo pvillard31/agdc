@@ -29,11 +29,12 @@ _log = logging.getLogger(__name__)
 
 
 class Satellite(Enum):
-    __order__ = "LS5 LS7 LS8"
+    __order__ = "LS5 LS7 LS8 S1"
 
     LS5 = "LS5"
     LS7 = "LS7"
     LS8 = "LS8"
+    S1 = "S1"
 
 
 class Ls5TmBands(Enum):
@@ -172,8 +173,14 @@ class DsmBands(Enum):
     ASPECT = 3
 
 
+class S1Bands(Enum):
+    __order__ = "SIGMA_VV"
+
+    SIGMA_VV = 1
+
+
 class DatasetType(Enum):
-    __order__ = "ARG25 PQ25 FC25 DSM DEM DEM_SMOOTHED DEM_HYDROLOGICALLY_ENFORCED WATER NDVI EVI SAVI TCI NBR"
+    __order__ = "ARG25 PQ25 FC25 DSM DEM DEM_SMOOTHED DEM_HYDROLOGICALLY_ENFORCED WATER NDVI EVI SAVI TCI NBR SIGMA_VV"
 
     ARG25 = "ARG25"
     PQ25 = "PQ25"
@@ -190,13 +197,16 @@ class DatasetType(Enum):
     NBR = "NBR"
     NDWI = "NDWI"
     MNDWI = "MNDWI"
+    SIGMA_VV = "SIGMA_VV"
 
 
 dataset_type_database = [DatasetType.ARG25, DatasetType.PQ25, DatasetType.FC25,
                          DatasetType.WATER,
                          DatasetType.DSM,
-                         DatasetType.DEM, DatasetType.DEM_HYDROLOGICALLY_ENFORCED, DatasetType.DEM_SMOOTHED]
+                         DatasetType.DEM, DatasetType.DEM_HYDROLOGICALLY_ENFORCED, DatasetType.DEM_SMOOTHED, DatasetType.SIGMA_VV]
 dataset_type_filesystem = []
+
+#TODO derived nbar sigma VV ?
 dataset_type_derived_nbar = [DatasetType.NDVI, DatasetType.EVI, DatasetType.NBR, DatasetType.TCI, DatasetType.NDWI, DatasetType.MNDWI]
 
 
@@ -236,8 +246,10 @@ class DatasetTile:
         # Construct a WOFS dataset based on the NBAR dataset
         # If one exists on the filesystem then add it otherwise (None is returned by the make_wofs_dataset) we don't
 
-        dst = make_wofs_dataset(satellite_id, out[DatasetType.ARG25])
+        if (out.__contains__(DatasetType.ARG25)):
+            dst = make_wofs_dataset(satellite_id, out[DatasetType.ARG25])
 
+        # TODO should we ignore this if not ARG25?
         if dst:
             out[DatasetType.WATER] = dst
 
@@ -415,6 +427,8 @@ BANDS = {
     (DatasetType.MNDWI, Satellite.LS5): MndwiBands,
     (DatasetType.MNDWI, Satellite.LS7): MndwiBands,
     (DatasetType.MNDWI, Satellite.LS8): MndwiBands,
+
+    (DatasetType.SIGMA_VV, Satellite.S1): S1Bands,
 }
 
 

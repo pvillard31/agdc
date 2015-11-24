@@ -12,7 +12,7 @@ values (51, 51, 'Sentinel_1', 'Sentinel 1 Radar Sensor');
 -- => can the sizes be whatever we want, or do they depend on the images we get?
 -- compress ???
 insert into tile_type (tile_type_id, tile_type_name, crs, x_origin, y_origin, x_size, y_size, x_pixels, y_pixels, unit, file_format, file_extension, tile_directory, format_options)
-values (51, 'Unprojected WGS84 10-degree at 400 pixels/degree (for SENTINEL 1 250m)', 'EPSG:4326', 0, 0, 10, 10, 4000, 4000, 'degree', 'ENVI', '.img', 'SENTINEL', 'COMPRESS=LZW');
+values (51, 'Unprojected WGS84 1-degree at 4000 pixels/degree (for SENTINEL 1)', 'EPSG:4326', 0, 0, 1, 1, 4000, 4000, 'degree', 'ENVI', '.img', 'SENTINEL', 'COMPRESS=LZW');
 
 -- no need for a new band type, sigma VV is derived
 --insert into band_type (band_type_id, band_type_name) values (31, 'RBQ');

@@ -216,10 +216,10 @@ class CellTool(Tool):
         Tool.setup_arguments(self)
 
         self.parser.add_argument("--x", help="X grid reference", action="store", dest="x", type=int,
-                                 choices=range(110, 155 + 1), required=True, metavar="[110 - 155]")
+                                 choices=range(-180, 180 + 1), required=True, metavar="[-180 - 180]")
 
         self.parser.add_argument("--y", help="Y grid reference", action="store", dest="y", type=int,
-                                 choices=range(-45, -10 + 1), required=True, metavar="[-45 - -10]")
+                                 choices=range(-90, 90 + 1), required=True, metavar="[-90 - 90]")
 
         self.parser.add_argument("--mask-vector-apply", help="Apply mask from feature in vector file",
                                  action="store_true", dest="mask_vector_apply", default=False)
