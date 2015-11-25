@@ -28,7 +28,7 @@ setup(name='agdc',
           'agdc.ingest.modis',
           'agdc.ingest.landsat',
           'agdc.ingest.wofs',
-          'agdc.ingest.sentinel1',
+          'agdc.ingest.sentinel1'
       ],
       package_data = {
                       'agdc': ['agdc_default.conf']
@@ -42,8 +42,8 @@ setup(name='agdc',
           'console_scripts': [
               'agdc-ingest-landsat = agdc.ingest.landsat:cli',
               'agdc-ingest-modis = agdc.ingest.modis:cli',
-              'agdc-ingest-wofs = agdc.ingest.wofs:cli'
-              'agdc-ingest-sentinel1 = agdc.ingest.sentinel1:cli',
+              'agdc-ingest-wofs = agdc.ingest.wofs:cli',
+              'agdc-ingest-sentinel1 = agdc.ingest.sentinel1:cli'
           ]
       },
       install_requires=[
