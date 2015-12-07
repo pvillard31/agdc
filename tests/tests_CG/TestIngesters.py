@@ -14,15 +14,27 @@ from gdalconst import *
 
 from agdc.ingest.landsat.core import LandsatIngester
 from agdc.ingest.sentinel1.core import SentinelIngester
+from agdc.ingest.smos.core import SmosIngester
 
-logging.basicConfig(level=logging.DEBUG);
+logging.basicConfig(level=logging.DEBUG)
 _LOG = logging.getLogger('TestCG')
 
-if True:
+sat = 3
+
+
+if sat == 1:
+    from agdc.ingest import run_ingest
+    run_ingest(LandsatIngester)
+
+if sat == 2:
     from agdc.ingest import run_ingest
     run_ingest(SentinelIngester)
 
-if False:
+if sat == 3:
+    from agdc.ingest import run_ingest
+    run_ingest(SmosIngester)
+
+if sat == 4:
     dataset = gdal.Open( "/data/agdc/S1_orthorect/water_after.img", GA_ReadOnly )
     if dataset is None:
         print 'error reading s1 dataset'
