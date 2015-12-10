@@ -8,7 +8,6 @@ values (51, 51, 'Sentinel_1', 'Sentinel 1 Radar Sensor');
 
 -- new tile_type for Sentinel 1
 -- tile type name ???
--- compress ???
 insert into tile_type (tile_type_id, tile_type_name, crs, x_origin, y_origin, x_size, y_size, x_pixels, y_pixels, unit, file_format, file_extension, tile_directory, format_options)
 values (51, 'Unprojected WGS84 1-degree at 4000 pixels/degree (for SENTINEL 1)', 'EPSG:4326', 0, 0, 1, 1, 4000, 4000, 'degree', 'GTiff', '.tif', 'SENTINEL', 'COMPRESS=LZW');
 
@@ -23,21 +22,10 @@ values (510, 51, 'Sigma_VV', 4, 1, 500, 14.0850000000000009, 14.3849999999999998
 
 
 -- new processing level for sentinel 1
--- nodata value ???
 -- resampling method ???
 insert into processing_level (level_id, level_name, nodata_value, resampling_method, level_description)
 values (51, 'RANGE_DOPPLER_TERRAIN_CORRECTION', -28672, 'near', 'Sentinel 1 Range Doppler Terrain Correction');
 
+-- new band source
 insert into band_source (tile_type_id, band_id, level_id, tile_layer) values (51, 510, 51, 1);
 
-
--- band lookup scheme
--- what is it for ???
-insert into band_lookup_scheme (lookup_scheme_id, lookup_scheme_name, lookup_scheme_description)
-values (51, 'Sentinel 1', 'Sentinel bands');
-
--- new band equivalent
--- what is it for ???
--- nominal centre, bandwidth, tolerance... ???
-insert into band_equivalent (lookup_scheme_id, master_band_name, master_band_tag, nominal_centre, nominal_bandwidth, centre_tolerance, bandwidth_tolerance, band_type_id)
-values (51, 'Sigma_VV', 'SigmaVV', 14.235, 0.3, 0.00025, 0.00025, 4);

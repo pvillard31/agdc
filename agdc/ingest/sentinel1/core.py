@@ -38,23 +38,16 @@ _LOG = logging.getLogger(__name__)
 
 def _is_sentinel_file(filename):
     """
-    Does the given file match a Modis NetCDF file?
+    Does the given file match a Sentinel NetCDF file?
 
     (we could make this more extensive in the future, but it's directly derived from the old find_files() logic.
 
     :type filename: str
     :rtype: bool
-    >>> d = '/g/data/u39/public/data/modis/datacube/mod09-swath/terra/2010/12/31'
-    >>> f = 'MOD09_L2.2010365.2300.20130130162407.remapped_swath_500mbands_0.005deg.nc'
-    >>> _is_modis_file(f)
-    True
-    >>> _is_modis_file(os.path.join(d, f))
-    True
-    >>> _is_modis_file(d)
-    False
     """
     basename = os.path.basename(filename).lower()
     #basename.startswith('sentinel') and
+    #TODO more precise ?
     return filename.endswith(".img")
 
 
@@ -80,7 +73,6 @@ class SentinelIngester(SourceFileIngester):
         """
         (start_date, end_date) = self.get_date_range()
 
-        # Modis 'path' is actually the Orbit number.
         (min_path, max_path) = self.get_path_range()
 
         include = ((max_path is None or path is None or int(path) <= int(max_path)) and

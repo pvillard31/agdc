@@ -17,9 +17,9 @@
 #===============================================================================
 
 """
-    sentinel_dataset.py - dataset class for modis datasets.
+    smos_dataset.py - dataset class for Sentinel datasets.
 
-    This is the implementation of the AbstractDataset class for modis
+    This is the implementation of the AbstractDataset class for Sentinel
     datasets.
 """
 from __future__ import absolute_import
@@ -81,22 +81,22 @@ class SentinelDataset(AbstractDataset):
 
         self._dataset_size = os.path.getsize(self._dataset_path)/1000
         
-        LOGGER.debug('Transform = %s', self._ds.GetGeoTransform());
-        LOGGER.debug('Projection = %s', self._ds.GetProjection());
+        LOGGER.debug('Transform = %s', self._ds.GetGeoTransform())
+        LOGGER.debug('Projection = %s', self._ds.GetProjection())
 
-        LOGGER.debug('RasterXSize = %s', self._ds.RasterXSize);
-        LOGGER.debug('RasterYSize = %s', self._ds.RasterYSize);
+        LOGGER.debug('RasterXSize = %s', self._ds.RasterXSize)
+        LOGGER.debug('RasterYSize = %s', self._ds.RasterYSize)
 
 
 
         # TODO do stuff
-        metadata_file_path = fileName+'.xml';
+        metadata_file_path = fileName+'.xml'
         metadata_file = open(metadata_file_path, 'r')
         self._xml_text = metadata_file.read()
         metadata_file.close()
 
 
-        tree = etree.parse(metadata_file_path);
+        tree = etree.parse(metadata_file_path)
         startTime = tree.xpath("/product/adsHeader/startTime")[0].text
         endTime = tree.xpath("/product/adsHeader/startTime")[0].text
         orbitNumber = int(tree.xpath("/product/adsHeader/absoluteOrbitNumber")[0].text)
@@ -193,17 +193,17 @@ class SentinelDataset(AbstractDataset):
         return int(result['stdout'])
 
     def _get_gcp_count(self):
-        """N/A for Modis."""
+        """N/A for Sentinel."""
 
         return 0
 
     def _get_mtl_text(self):
-        """N/A for Modis."""
+        """N/A for Sentinel."""
 
         return None
 
     def _get_xml_text(self):
-        """N/A for Modis."""
+        """N/A for Sentinel."""
 
         return None
 
@@ -240,12 +240,10 @@ class SentinelDataset(AbstractDataset):
 
         In whatever numbering scheme is used for this satellite.
         """
-        #TODO ??
         return self._orbitnumber
 
     def get_y_ref(self):
-        """N/A for Modis."""
-        #TODO ??
+        """N/A for Sentinel."""
         return None
 
     def get_start_datetime(self):
