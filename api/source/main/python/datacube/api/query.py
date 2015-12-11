@@ -45,17 +45,18 @@ TILE_CLASSES = [TileClass.SINGLE, TileClass.MOSAIC]
 
 
 class TileType(Enum):
-    __order__ = "ONE_DEGREE SENTINEL"
+    __order__ = "ONE_DEGREE SENTINEL SMOS"
 
     ONE_DEGREE = 1
     SENTINEL = 51
+    SMOS = 52
 
 
 TILE_TYPE = TileType.ONE_DEGREE
 
 
 class ProcessingLevel(Enum):
-    __order__ = "ORTHO NBAR PQA FC L1T MAP DSM DEM DEM_S DEM_H RDTC"
+    __order__ = "ORTHO NBAR PQA FC L1T MAP DSM DEM DEM_S DEM_H RDTC MOISTURE"
 
     ORTHO = 1
     NBAR = 2
@@ -68,6 +69,7 @@ class ProcessingLevel(Enum):
     DEM_S = 120
     DEM_H = 130
     RDTC = 51
+    MOISTURE = 52
 
 
 class SortType(Enum):
@@ -1241,8 +1243,12 @@ def build_list_tiles_sql_and_params(x, y, satellites, acq_min, acq_max, dataset_
     :return: The SQL query and params
     :rtype: (str, dict)
     """
+
+    # TODO make it possible to have multisensor with sentinel and smos
     if DatasetType.SIGMA_VV in dataset_types:
         sql, params = build_list_tiles_sql_and_params_sentinel(x, y, satellites, acq_min, acq_max, dataset_types, include, exclude, sort)
+    elif DatasetType.MOISTURE in dataset_types:
+        sql, params = build_list_tiles_sql_and_params_smos(x, y, satellites, acq_min, acq_max, dataset_types, include, exclude, sort)
     else:
         sql, params = build_list_tiles_sql_and_params_initial(x, y, satellites, acq_min, acq_max, dataset_types, include, exclude, sort)
     return sql, params
@@ -1618,7 +1624,7 @@ def build_list_tiles_sql_and_params_initial(x, y, satellites, acq_min, acq_max, 
 def build_list_tiles_sql_and_params_sentinel(x, y, satellites, acq_min, acq_max, dataset_types, include=None, exclude=None, sort=SortType.ASC):
 
     """
-    Build the SQL query string and parameters required to return the tiles matching the criteria
+    Build the SQL query string and parameters required to return the tiles matching the criteria for sentinel
 
     :param x: X cell range
     :type x: list[int]
@@ -1774,6 +1780,210 @@ def build_list_tiles_sql_and_params_sentinel(x, y, satellites, acq_min, acq_max,
               "x": x, "y": y,
               "acq_min": acq_min, "acq_max": acq_max,
               "level_rdtc": ProcessingLevel.RDTC.value}
+
+
+    if exclude:
+        for index, exclusion in enumerate(exclude):
+            if type(exclusion) is DateCriteria:
+
+                if exclusion.acq_min:
+                    params["exclude_acq_min_{0}".format(index)] = exclusion.acq_min
+
+                if exclusion.acq_max:
+                    params["exclude_acq_max_{0}".format(index)] = exclusion.acq_max
+
+            elif type(exclusion) is SatelliteDateCriteria:
+
+                params["exclude_satellite_{0}".format(index)] = exclusion.satellite.value
+
+                if exclusion.acq_min:
+                    params["exclude_acq_min_{0}".format(index)] = exclusion.acq_min
+
+                if exclusion.acq_max:
+                    params["exclude_acq_max_{0}".format(index)] = exclusion.acq_max
+
+    if include:
+        for index, inclusion in enumerate(include):
+            if type(inclusion) is DateCriteria:
+
+                if inclusion.acq_min:
+                    params["include_acq_min_{0}".format(index)] = inclusion.acq_min
+
+                if inclusion.acq_max:
+                    params["include_acq_max_{0}".format(index)] = inclusion.acq_max
+
+            elif type(inclusion) is SatelliteDateCriteria:
+
+                params["include_satellite_{0}".format(index)] = inclusion.satellite.value
+
+                if exclusion.acq_min:
+                    params["include_acq_min_{0}".format(index)] = inclusion.acq_min
+
+                if exclusion.acq_max:
+                    params["include_acq_max_{0}".format(index)] = inclusion.acq_max
+
+    return sql, params
+
+
+def build_list_tiles_sql_and_params_smos(x, y, satellites, acq_min, acq_max, dataset_types, include=None, exclude=None, sort=SortType.ASC):
+
+    """
+    Build the SQL query string and parameters required to return the tiles matching the criteria for smos
+
+    :param x: X cell range
+    :type x: list[int]
+    :param y: Y cell range
+    :type y: list[int]
+    :param satellites: Satellites
+    :type satellites: list[datacube.api.model.Satellite]
+    :param acq_min: Acquisition date range
+    :type acq_min: datetime.datetime
+    :param acq_max: Acquisition date range
+    :type acq_max: datetime.datetime
+    :param dataset_types: Dataset types
+    :type dataset_types: list[datacube.api.model.DatasetType]
+    :param include: Inclusions - currently supports date range and satellite/date range
+    :type include: list[criteria] e.g. list[datacube.api.query.SatelliteDateExclusion]
+    :param exclude: Exclusions - currently supports date range and satellite/date range
+    :type exclude: list[criteria] e.g. list[datacube.api.query.SatelliteDateExclusion]
+    :param sort: Sort order
+    :type sort: datacube.api.query.SortType
+
+    :return: The SQL query and params
+    :rtype: (str, dict)
+    """
+
+    sql = """
+        select
+            acquisition.acquisition_id, satellite_tag as satellite, start_datetime, end_datetime,
+            extract(year from end_datetime) as end_datetime_year, extract(month from end_datetime) as end_datetime_month,
+            moist.x_index, moist.y_index, point(moist.x_index, moist.y_index) as xy,
+        """
+
+    sql += """
+            ARRAY[
+    """
+
+    sql += """
+            ['MOISTURE', moist.tile_pathname]
+        """
+
+    sql += """
+            ] as datasets
+    """
+
+    sql += """
+        from acquisition
+        join satellite on satellite.satellite_id=acquisition.satellite_id
+        """
+
+    sql += """
+        join
+            (
+            select
+                dataset.acquisition_id, tile.dataset_id, tile.x_index, tile.y_index, tile.tile_pathname, tile.tile_type_id, tile.tile_class_id
+            from tile
+            join dataset on dataset.dataset_id=tile.dataset_id
+            where dataset.level_id = %(level_moist)s
+            ) as moist on moist.acquisition_id=acquisition.acquisition_id
+            """
+
+    sql += """
+        where
+            moist.tile_type_id = ANY(%(tile_type)s) and moist.tile_class_id = ANY(%(tile_class)s) -- mandatory
+            and satellite.satellite_tag = ANY(%(satellite)s)
+            and moist.x_index = ANY(%(x)s) and moist.y_index = ANY(%(y)s)
+            and end_datetime::date between %(acq_min)s and %(acq_max)s
+        """
+
+    if exclude:
+        for index, exclusion in enumerate(exclude):
+
+            esql = ""
+
+            if type(exclusion) is DateCriteria:
+                esql += " and ("
+
+                if exclusion.acq_min and exclusion.acq_max:
+                    esql += "end_datetime::date not between %(exclude_acq_min_{0})s and %(exclude_acq_max_{0})s".format(index)
+
+                elif exclusion.acq_min:
+                    esql += "end_datetime::date < %(exclude_acq_min_{0})s".format(index)
+
+                elif exclusion.acq_max:
+                    esql += "end_datetime::date > %(exclude_acq_max_{0})s".format(index)
+
+                esql += ")"
+
+                sql += esql
+
+            elif type(exclusion) is SatelliteDateCriteria:
+                esql += " and (satellite.satellite_tag <> %(exclude_satellite_{0})s".format(index)
+
+                if exclusion.acq_min and exclusion.acq_max:
+                    esql += " or end_datetime::date not between %(exclude_acq_min_{0})s and %(exclude_acq_max_{0})s".format(index)
+
+                elif exclusion.acq_min:
+                    esql += " or end_datetime::date < %(exclude_acq_min_{0})s".format(index)
+
+                elif exclusion.acq_max:
+                    esql += " or end_datetime::date > %(exclude_acq_max_{0})s".format(index)
+
+                esql += ")"
+
+                sql += esql
+
+    if include:
+        esql = ""
+
+        for index, inclusion in enumerate(include):
+
+            if type(inclusion) is DateCriteria:
+                esql += len(esql) > 0 and " or " or " "
+
+                if inclusion.acq_min and inclusion.acq_max:
+                    esql += "end_datetime::date between %(include_acq_min_{0})s and %(include_acq_max_{0})s".format(index)
+
+                elif inclusion.acq_min:
+                    esql += "end_datetime::date >= %(include_acq_min_{0})s".format(index)
+
+                elif inclusion.acq_max:
+                    esql += "end_datetime::date <= %(include_acq_max_{0})s".format(index)
+
+                # esql += ")"
+
+            # elif type(inclusion) is SatelliteDateCriteria:
+                # esql += " and (satellite.satellite_tag <> %(exclude_satellite_{0})s".format(index)
+                #
+                # if inclusion.acq_min and exclusion.acq_max:
+                #     esql += " or end_datetime not between %(exclude_acq_min_{0})s and %(exclude_acq_min_{0})s".format(index)
+                #
+                # elif inclusion.acq_min:
+                #     esql += " or end_datetime < %(exclude_acq_min_{0})s".format(index)
+                #
+                # elif inclusion.acq_max:
+                #     esql += " or end_datetime > %(exclude_acq_max_{0})s".format(index)
+                #
+                # esql += ")"
+                #
+                # sql += esql
+
+            else:
+                raise Exception("Not yet implemented")
+
+        if len(esql) > 0:
+            sql += " and (" + esql + ")"
+
+    sql += """
+        order by moist.x_index, moist.y_index, end_datetime {sort}, satellite asc
+    """.format(sort=sort.value)
+
+    params = {"tile_type": [TileType.SMOS.value],
+              "tile_class": [tile_class.value for tile_class in TILE_CLASSES],
+              "satellite": [satellite.value for satellite in satellites],
+              "x": x, "y": y,
+              "acq_min": acq_min, "acq_max": acq_max,
+              "level_moist": ProcessingLevel.MOISTURE.value}
 
 
     if exclude:

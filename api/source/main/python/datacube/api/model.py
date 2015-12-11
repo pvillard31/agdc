@@ -29,12 +29,13 @@ _log = logging.getLogger(__name__)
 
 
 class Satellite(Enum):
-    __order__ = "LS5 LS7 LS8 S1"
+    __order__ = "LS5 LS7 LS8 S1 SMOS"
 
     LS5 = "LS5"
     LS7 = "LS7"
     LS8 = "LS8"
     S1 = "S1"
+    SMOS = "SMOS"
 
 
 class Ls5TmBands(Enum):
@@ -179,8 +180,15 @@ class S1Bands(Enum):
     SIGMA_VV = 1
 
 
+class SMOSBands(Enum):
+    __order__ = "MOISTURE MOISTURE_DQX"
+
+    MOISTURE = 1
+    MOISTURE_DQX = 2
+
+
 class DatasetType(Enum):
-    __order__ = "ARG25 PQ25 FC25 DSM DEM DEM_SMOOTHED DEM_HYDROLOGICALLY_ENFORCED WATER NDVI EVI SAVI TCI NBR SIGMA_VV"
+    __order__ = "ARG25 PQ25 FC25 DSM DEM DEM_SMOOTHED DEM_HYDROLOGICALLY_ENFORCED WATER NDVI EVI SAVI TCI NBR SIGMA_VV MOISTURE"
 
     ARG25 = "ARG25"
     PQ25 = "PQ25"
@@ -198,7 +206,7 @@ class DatasetType(Enum):
     NDWI = "NDWI"
     MNDWI = "MNDWI"
     SIGMA_VV = "SIGMA_VV"
-
+    MOISTURE = "MOISTURE"
 
 dataset_type_database = [DatasetType.ARG25, DatasetType.PQ25, DatasetType.FC25,
                          DatasetType.WATER,
@@ -429,6 +437,8 @@ BANDS = {
     (DatasetType.MNDWI, Satellite.LS8): MndwiBands,
 
     (DatasetType.SIGMA_VV, Satellite.S1): S1Bands,
+
+    (DatasetType.MOISTURE, Satellite.SMOS): SMOSBands
 }
 
 

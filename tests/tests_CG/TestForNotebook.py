@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 #import ogr
 #import pandas
-from datacube.api.model import DatasetType, Satellite, BANDS
+from datacube.api.model import DatasetType, Satellite, BANDS, S1Bands
 from datacube.api.query import list_tiles_as_list
 from datacube.api.utils import get_dataset_data, get_dataset_metadata
 from eotools.tiling import generate_tiles
@@ -43,15 +43,15 @@ print "Tile file path location: {path}".format(path=dataset.path)
 print "Array dimensions:\nx: {x} & y: {y}".format(x=samples, y=lines)
 
 
-matrix = np.reshape(data.get(data.keys()[0]), (-1, 4000))
+matrix = np.reshape(data.get(S1Bands.SIGMA_VV), (-1, 4000))
 plt.imshow(matrix, cmap = cm.Greys_r, vmin=0, vmax=1)
 plt.colorbar()
 
-print data.get(data.keys()[0]).min()
-print data.get(data.keys()[0]).max()
+print data.get(S1Bands.SIGMA_VV).min()
+print data.get(S1Bands.SIGMA_VV).max()
 
 allVal = []
-for tab in data.get(data.keys()[0]):
+for tab in data.get(S1Bands.SIGMA_VV):
     for val in tab:
         if val > 0:
             allVal.append(val)
