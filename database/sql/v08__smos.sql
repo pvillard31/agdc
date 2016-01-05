@@ -21,7 +21,7 @@ values (52, 'Unprojected WGS84 10-degree at 4 pixels/degree (for SMOS)', 'EPSG:4
 insert into agdc.band (band_id, sensor_id, band_name, band_type_id, file_number, resolution, min_wavelength, max_wavelength, file_pattern, satellite_id, band_tag, band_number)
 values (520, 52, 'Soil_Moisture', 4, 1, 500, 14.0850000000000009, 14.3849999999999998, '.*Soil_Moisture\..*', 52, 'Soil_Moisture', 1);
 insert into agdc.band (band_id, sensor_id, band_name, band_type_id, file_number, resolution, min_wavelength, max_wavelength, file_pattern, satellite_id, band_tag, band_number)
-values (521, 52, 'Soil_Moisture_Dqx', 4, 2, 500, 14.0850000000000009, 14.3849999999999998, '.*Soil_Moisture_Dqx\..*', 52, 'Soil_Moisture_Dqx', 1);
+values (521, 52, 'Soil_Moisture_Dqx', 4, 2, 500, 14.0850000000000009, 14.3849999999999998, '.*Soil_Moisture_Dqx\..*', 52, 'Soil_Moisture_Dqx', 2);
 
 -- new processing level for sentinel 1
 -- resampling method ???

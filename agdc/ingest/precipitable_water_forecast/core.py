@@ -17,11 +17,10 @@
 # ===============================================================================
 
 """
-Ingester for Sentinel datasets.
+Ingester for Precipitable water prevision datasets.
 """
 from __future__ import absolute_import
 
-import re
 import os
 import logging
 from os.path import basename
@@ -32,14 +31,14 @@ from eotools.execute import execute
 
 from agdc.ingest import SourceFileIngester
 from agdc.cube_util import DatasetError
-from .smos_dataset import SmosDataset
+from .precipitable_water_forecast_dataset import PrecipitableWaterForecastDataset
 
 _LOG = logging.getLogger(__name__)
 
 
-def _is_smos_file(filename):
+def _is_precipitable_water_forecast_file(filename):
     """
-    Does the given file match a Smos NetCDF file?
+    Does the given file match a Precipitable water forecast tif file?
 
     (we could make this more extensive in the future, but it's directly derived from the old find_files() logic.
 
@@ -47,16 +46,14 @@ def _is_smos_file(filename):
     :rtype: bool
     """
     basename = os.path.basename(filename).lower()
-    #basename.startswith('sentinel') and
-    #TODO more precise ?
     return filename.endswith(".tif")
 
 
-class SmosIngester(SourceFileIngester):
-    """Ingester class for Smos datasets."""
+class PrecipitableWaterForecastIngester(SourceFileIngester):
+    """Ingester class for Sentinel datasets."""
 
     def __init__(self, datacube=None, collection=None):
-        super(SmosIngester, self).__init__(_is_smos_file, datacube, collection)
+        super(PrecipitableWaterForecastIngester, self).__init__(_is_precipitable_water_forecast_file, datacube, collection)
 
     def open_dataset(self, dataset_path):
         """Create and return a dataset object.
@@ -65,23 +62,21 @@ class SmosIngester(SourceFileIngester):
            its metadata read.
         """
 
-        return SmosDataset(dataset_path)
-
+        return PrecipitableWaterForecastDataset(dataset_path)
 
     def find_datasets(self, source_dir):
         """Return the source dir if it is a dataset.
-        Datasets are identified as a directory containing 3 tif files
-        containing Soil_Moisture in their name.
+        Datasets are identified as a directory containing 3 tif files containing precipitable_water in their name
         """
 
         _LOG.info('Searching for datasets in %s', source_dir)
-        command = "find %s -name '*Soil_Moisture*' | sort" % source_dir
+        command = "find %s -name '*f[0-9][0-9][0-9]_precipitable_water.tif' | sort" % source_dir
         _LOG.debug('executing "%s"', command)
         result = execute(command)
         assert not result['returncode'], \
             '"%s" failed: %s' % (command, result['stderr'])
 
-        if len(result['stdout'].split('\n')) == 3:
+        if len(result['stdout'].split('\n')) == 4:
             dataset_list = [source_dir]
         else:
             dataset_list = []

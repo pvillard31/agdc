@@ -192,7 +192,7 @@ class AbstractIngester(with_metaclass(ABCMeta)):
         except DatasetSkipError as err:
             self.log_dataset_skip(dataset_path, err, datetime.now() - start_datetime)
 
-        except:
+        except Exception as err:
             # Log which dataset caused the error, and re-raise it.
             LOGGER.error('Unexpected error during path %r', dataset_path)
             raise
