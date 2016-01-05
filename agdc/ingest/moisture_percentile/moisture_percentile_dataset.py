@@ -154,7 +154,7 @@ class MoisturePercentileDataset(AbstractDataset):
 
         self._gcp_count = None
         self._mtl_text = None
-        self._processor_level = "Percentile"
+        self._processor_level = "Moisture_Percentile"
 
         AbstractDataset.__init__(self)
 

@@ -29,7 +29,10 @@ setup(name='agdc',
           'agdc.ingest.landsat',
           'agdc.ingest.wofs',
           'agdc.ingest.sentinel1',
-          'agdc.ingest.smos'
+          'agdc.ingest.smos',
+          'agdc.ingest.moisture_percentile',
+          'agdc.ingest.precipitation_percentile',
+          'agdc.ingest.precipitable_water_forecast'
       ],
       package_data = {
                       'agdc': ['agdc_default.conf']
@@ -46,6 +49,9 @@ setup(name='agdc',
               'agdc-ingest-wofs = agdc.ingest.wofs:cli',
               'agdc-ingest-sentinel1 = agdc.ingest.sentinel1:cli',
               'agdc-ingest-smos = agdc.ingest.smos:cli',
+              'agdc-ingest-percentile-moisture = agdc.ingest.moisture_percentile:cli',
+              'agdc-ingest-percentile-precipitation = agdc.ingest.precipitation_percentile:cli',
+              'agdc-ingest-precipitable-water-forecast = agdc.ingest.precipitable_water_forecast:cli'
           ]
       },
       install_requires=[

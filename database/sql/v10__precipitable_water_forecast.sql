@@ -21,10 +21,10 @@ values (542, 55, 'Precipitable_water_5d', 4, 3, 500, 14.0850000000000009, 14.384
 
 -- new processing level for Forecast
 insert into agdc.processing_level (level_id, level_name, nodata_value, resampling_method, level_description)
-values (54, 'FORECAST', -32768, 'near', 'Forecast');
+values (55, 'PRECIPITABLE_WATER_FORECAST', -32768, 'near', 'Precipitable Water Forecast');
 
 
 -- new band source
-insert into agdc.band_source (tile_type_id, band_id, level_id, tile_layer) values (54, 540, 54, 1);
-insert into agdc.band_source (tile_type_id, band_id, level_id, tile_layer) values (54, 541, 54, 2);
-insert into agdc.band_source (tile_type_id, band_id, level_id, tile_layer) values (54, 542, 54, 3);
+insert into agdc.band_source (tile_type_id, band_id, level_id, tile_layer) values (54, 540, 55, 1);
+insert into agdc.band_source (tile_type_id, band_id, level_id, tile_layer) values (54, 541, 55, 2);
+insert into agdc.band_source (tile_type_id, band_id, level_id, tile_layer) values (54, 542, 55, 3);

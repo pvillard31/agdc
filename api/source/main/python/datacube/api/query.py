@@ -45,18 +45,20 @@ TILE_CLASSES = [TileClass.SINGLE, TileClass.MOSAIC]
 
 
 class TileType(Enum):
-    __order__ = "ONE_DEGREE SENTINEL SMOS"
+    __order__ = "ONE_DEGREE SENTINEL SMOS PERCENTILE FORECAST"
 
     ONE_DEGREE = 1
     SENTINEL = 51
     SMOS = 52
+    PERCENTILE = 53
+    FORECAST = 54
 
 
 TILE_TYPE = TileType.ONE_DEGREE
 
 
 class ProcessingLevel(Enum):
-    __order__ = "ORTHO NBAR PQA FC L1T MAP DSM DEM DEM_S DEM_H RDTC MOISTURE"
+    __order__ = "ORTHO NBAR PQA FC L1T MAP DSM DEM DEM_S DEM_H RDTC MOISTURE PERCENTILE_MOISTURE PERCENTILE_PRECIPITATION PRECIPITATABLE_WATER_FORECAST"
 
     ORTHO = 1
     NBAR = 2
@@ -70,7 +72,9 @@ class ProcessingLevel(Enum):
     DEM_H = 130
     RDTC = 51
     MOISTURE = 52
-
+    PERCENTILE_MOISTURE = 53
+    PERCENTILE_PRECIPITATION = 54
+    PRECIPITATABLE_WATER_FORECAST = 55
 
 class SortType(Enum):
     __order__ = "ASC DESC"
@@ -1249,6 +1253,12 @@ def build_list_tiles_sql_and_params(x, y, satellites, acq_min, acq_max, dataset_
         sql, params = build_list_tiles_sql_and_params_sentinel(x, y, satellites, acq_min, acq_max, dataset_types, include, exclude, sort)
     elif DatasetType.MOISTURE in dataset_types:
         sql, params = build_list_tiles_sql_and_params_smos(x, y, satellites, acq_min, acq_max, dataset_types, include, exclude, sort)
+    elif DatasetType.MOISTURE_PERCENTILE in dataset_types:
+        sql, params = build_list_tiles_sql_and_params_moisture_percentile(x, y, satellites, acq_min, acq_max, dataset_types, include, exclude, sort)
+    elif DatasetType.PRECIPITATION_PERCENTILE in dataset_types:
+        sql, params = build_list_tiles_sql_and_params_precipitation_percentile(x, y, satellites, acq_min, acq_max, dataset_types, include, exclude, sort)
+    elif DatasetType.PRECIPITABLE_WATER_FORECAST in dataset_types:
+        sql, params = build_list_tiles_sql_and_params_precipitable_water_forecast(x, y, satellites, acq_min, acq_max, dataset_types, include, exclude, sort)
     else:
         sql, params = build_list_tiles_sql_and_params_initial(x, y, satellites, acq_min, acq_max, dataset_types, include, exclude, sort)
     return sql, params
@@ -2027,6 +2037,619 @@ def build_list_tiles_sql_and_params_smos(x, y, satellites, acq_min, acq_max, dat
                     params["include_acq_max_{0}".format(index)] = inclusion.acq_max
 
     return sql, params
+
+
+def build_list_tiles_sql_and_params_moisture_percentile(x, y, satellites, acq_min, acq_max, dataset_types, include=None, exclude=None, sort=SortType.ASC):
+
+    """
+    Build the SQL query string and parameters required to return the tiles matching the criteria for sentinel
+
+    :param x: X cell range
+    :type x: list[int]
+    :param y: Y cell range
+    :type y: list[int]
+    :param satellites: Satellites
+    :type satellites: list[datacube.api.model.Satellite]
+    :param acq_min: Acquisition date range
+    :type acq_min: datetime.datetime
+    :param acq_max: Acquisition date range
+    :type acq_max: datetime.datetime
+    :param dataset_types: Dataset types
+    :type dataset_types: list[datacube.api.model.DatasetType]
+    :param include: Inclusions - currently supports date range and satellite/date range
+    :type include: list[criteria] e.g. list[datacube.api.query.SatelliteDateExclusion]
+    :param exclude: Exclusions - currently supports date range and satellite/date range
+    :type exclude: list[criteria] e.g. list[datacube.api.query.SatelliteDateExclusion]
+    :param sort: Sort order
+    :type sort: datacube.api.query.SortType
+
+    :return: The SQL query and params
+    :rtype: (str, dict)
+    """
+
+    sql = """
+        select
+            acquisition.acquisition_id, satellite_tag as satellite, start_datetime, end_datetime,
+            extract(year from end_datetime) as end_datetime_year, extract(month from end_datetime) as end_datetime_month,
+            perc.x_index, perc.y_index, point(perc.x_index, perc.y_index) as xy,
+        """
+
+    sql += """
+            ARRAY[
+    """
+
+    sql += """
+            ['MOISTURE_PERCENTILE', perc.tile_pathname]
+        """
+
+    sql += """
+            ] as datasets
+    """
+
+    sql += """
+        from acquisition
+        join satellite on satellite.satellite_id=acquisition.satellite_id
+        """
+
+    sql += """
+        join
+            (
+            select
+                dataset.acquisition_id, tile.dataset_id, tile.x_index, tile.y_index, tile.tile_pathname, tile.tile_type_id, tile.tile_class_id
+            from tile
+            join dataset on dataset.dataset_id=tile.dataset_id
+            where dataset.level_id = %(level_perc)s
+            ) as perc on perc.acquisition_id=acquisition.acquisition_id
+            """
+
+    sql += """
+        where
+            perc.tile_type_id = ANY(%(tile_type)s) and perc.tile_class_id = ANY(%(tile_class)s) -- mandatory
+            and satellite.satellite_tag = ANY(%(satellite)s)
+            and perc.x_index = ANY(%(x)s) and perc.y_index = ANY(%(y)s)
+            and end_datetime::date between %(acq_min)s and %(acq_max)s
+        """
+
+    if exclude:
+        for index, exclusion in enumerate(exclude):
+
+            esql = ""
+
+            if type(exclusion) is DateCriteria:
+                esql += " and ("
+
+                if exclusion.acq_min and exclusion.acq_max:
+                    esql += "end_datetime::date not between %(exclude_acq_min_{0})s and %(exclude_acq_max_{0})s".format(index)
+
+                elif exclusion.acq_min:
+                    esql += "end_datetime::date < %(exclude_acq_min_{0})s".format(index)
+
+                elif exclusion.acq_max:
+                    esql += "end_datetime::date > %(exclude_acq_max_{0})s".format(index)
+
+                esql += ")"
+
+                sql += esql
+
+            elif type(exclusion) is SatelliteDateCriteria:
+                esql += " and (satellite.satellite_tag <> %(exclude_satellite_{0})s".format(index)
+
+                if exclusion.acq_min and exclusion.acq_max:
+                    esql += " or end_datetime::date not between %(exclude_acq_min_{0})s and %(exclude_acq_max_{0})s".format(index)
+
+                elif exclusion.acq_min:
+                    esql += " or end_datetime::date < %(exclude_acq_min_{0})s".format(index)
+
+                elif exclusion.acq_max:
+                    esql += " or end_datetime::date > %(exclude_acq_max_{0})s".format(index)
+
+                esql += ")"
+
+                sql += esql
+
+    if include:
+        esql = ""
+
+        for index, inclusion in enumerate(include):
+
+            if type(inclusion) is DateCriteria:
+                esql += len(esql) > 0 and " or " or " "
+
+                if inclusion.acq_min and inclusion.acq_max:
+                    esql += "end_datetime::date between %(include_acq_min_{0})s and %(include_acq_max_{0})s".format(index)
+
+                elif inclusion.acq_min:
+                    esql += "end_datetime::date >= %(include_acq_min_{0})s".format(index)
+
+                elif inclusion.acq_max:
+                    esql += "end_datetime::date <= %(include_acq_max_{0})s".format(index)
+
+                # esql += ")"
+
+            # elif type(inclusion) is SatelliteDateCriteria:
+                # esql += " and (satellite.satellite_tag <> %(exclude_satellite_{0})s".format(index)
+                #
+                # if inclusion.acq_min and exclusion.acq_max:
+                #     esql += " or end_datetime not between %(exclude_acq_min_{0})s and %(exclude_acq_min_{0})s".format(index)
+                #
+                # elif inclusion.acq_min:
+                #     esql += " or end_datetime < %(exclude_acq_min_{0})s".format(index)
+                #
+                # elif inclusion.acq_max:
+                #     esql += " or end_datetime > %(exclude_acq_max_{0})s".format(index)
+                #
+                # esql += ")"
+                #
+                # sql += esql
+
+            else:
+                raise Exception("Not yet implemented")
+
+        if len(esql) > 0:
+            sql += " and (" + esql + ")"
+
+    sql += """
+        order by perc.x_index, perc.y_index, end_datetime {sort}, satellite asc
+    """.format(sort=sort.value)
+
+    params = {"tile_type": [TileType.PERCENTILE.value],
+              "tile_class": [tile_class.value for tile_class in TILE_CLASSES],
+              "satellite": [satellite.value for satellite in satellites],
+              "x": x, "y": y,
+              "acq_min": acq_min, "acq_max": acq_max,
+              "level_perc": ProcessingLevel.PERCENTILE_MOISTURE.value}
+
+
+    if exclude:
+        for index, exclusion in enumerate(exclude):
+            if type(exclusion) is DateCriteria:
+
+                if exclusion.acq_min:
+                    params["exclude_acq_min_{0}".format(index)] = exclusion.acq_min
+
+                if exclusion.acq_max:
+                    params["exclude_acq_max_{0}".format(index)] = exclusion.acq_max
+
+            elif type(exclusion) is SatelliteDateCriteria:
+
+                params["exclude_satellite_{0}".format(index)] = exclusion.satellite.value
+
+                if exclusion.acq_min:
+                    params["exclude_acq_min_{0}".format(index)] = exclusion.acq_min
+
+                if exclusion.acq_max:
+                    params["exclude_acq_max_{0}".format(index)] = exclusion.acq_max
+
+    if include:
+        for index, inclusion in enumerate(include):
+            if type(inclusion) is DateCriteria:
+
+                if inclusion.acq_min:
+                    params["include_acq_min_{0}".format(index)] = inclusion.acq_min
+
+                if inclusion.acq_max:
+                    params["include_acq_max_{0}".format(index)] = inclusion.acq_max
+
+            elif type(inclusion) is SatelliteDateCriteria:
+
+                params["include_satellite_{0}".format(index)] = inclusion.satellite.value
+
+                if exclusion.acq_min:
+                    params["include_acq_min_{0}".format(index)] = inclusion.acq_min
+
+                if exclusion.acq_max:
+                    params["include_acq_max_{0}".format(index)] = inclusion.acq_max
+
+    return sql, params
+
+
+def build_list_tiles_sql_and_params_precipitation_percentile(x, y, satellites, acq_min, acq_max, dataset_types, include=None, exclude=None, sort=SortType.ASC):
+
+    """
+    Build the SQL query string and parameters required to return the tiles matching the criteria for sentinel
+
+    :param x: X cell range
+    :type x: list[int]
+    :param y: Y cell range
+    :type y: list[int]
+    :param satellites: Satellites
+    :type satellites: list[datacube.api.model.Satellite]
+    :param acq_min: Acquisition date range
+    :type acq_min: datetime.datetime
+    :param acq_max: Acquisition date range
+    :type acq_max: datetime.datetime
+    :param dataset_types: Dataset types
+    :type dataset_types: list[datacube.api.model.DatasetType]
+    :param include: Inclusions - currently supports date range and satellite/date range
+    :type include: list[criteria] e.g. list[datacube.api.query.SatelliteDateExclusion]
+    :param exclude: Exclusions - currently supports date range and satellite/date range
+    :type exclude: list[criteria] e.g. list[datacube.api.query.SatelliteDateExclusion]
+    :param sort: Sort order
+    :type sort: datacube.api.query.SortType
+
+    :return: The SQL query and params
+    :rtype: (str, dict)
+    """
+
+    sql = """
+        select
+            acquisition.acquisition_id, satellite_tag as satellite, start_datetime, end_datetime,
+            extract(year from end_datetime) as end_datetime_year, extract(month from end_datetime) as end_datetime_month,
+            perc.x_index, perc.y_index, point(perc.x_index, perc.y_index) as xy,
+        """
+
+    sql += """
+            ARRAY[
+    """
+
+    sql += """
+            ['PRECIPITATION_PERCENTILE', perc.tile_pathname]
+        """
+
+    sql += """
+            ] as datasets
+    """
+
+    sql += """
+        from acquisition
+        join satellite on satellite.satellite_id=acquisition.satellite_id
+        """
+
+    sql += """
+        join
+            (
+            select
+                dataset.acquisition_id, tile.dataset_id, tile.x_index, tile.y_index, tile.tile_pathname, tile.tile_type_id, tile.tile_class_id
+            from tile
+            join dataset on dataset.dataset_id=tile.dataset_id
+            where dataset.level_id = %(level_perc)s
+            ) as perc on perc.acquisition_id=acquisition.acquisition_id
+            """
+
+    sql += """
+        where
+            perc.tile_type_id = ANY(%(tile_type)s) and perc.tile_class_id = ANY(%(tile_class)s) -- mandatory
+            and satellite.satellite_tag = ANY(%(satellite)s)
+            and perc.x_index = ANY(%(x)s) and perc.y_index = ANY(%(y)s)
+            and end_datetime::date between %(acq_min)s and %(acq_max)s
+        """
+
+    if exclude:
+        for index, exclusion in enumerate(exclude):
+
+            esql = ""
+
+            if type(exclusion) is DateCriteria:
+                esql += " and ("
+
+                if exclusion.acq_min and exclusion.acq_max:
+                    esql += "end_datetime::date not between %(exclude_acq_min_{0})s and %(exclude_acq_max_{0})s".format(index)
+
+                elif exclusion.acq_min:
+                    esql += "end_datetime::date < %(exclude_acq_min_{0})s".format(index)
+
+                elif exclusion.acq_max:
+                    esql += "end_datetime::date > %(exclude_acq_max_{0})s".format(index)
+
+                esql += ")"
+
+                sql += esql
+
+            elif type(exclusion) is SatelliteDateCriteria:
+                esql += " and (satellite.satellite_tag <> %(exclude_satellite_{0})s".format(index)
+
+                if exclusion.acq_min and exclusion.acq_max:
+                    esql += " or end_datetime::date not between %(exclude_acq_min_{0})s and %(exclude_acq_max_{0})s".format(index)
+
+                elif exclusion.acq_min:
+                    esql += " or end_datetime::date < %(exclude_acq_min_{0})s".format(index)
+
+                elif exclusion.acq_max:
+                    esql += " or end_datetime::date > %(exclude_acq_max_{0})s".format(index)
+
+                esql += ")"
+
+                sql += esql
+
+    if include:
+        esql = ""
+
+        for index, inclusion in enumerate(include):
+
+            if type(inclusion) is DateCriteria:
+                esql += len(esql) > 0 and " or " or " "
+
+                if inclusion.acq_min and inclusion.acq_max:
+                    esql += "end_datetime::date between %(include_acq_min_{0})s and %(include_acq_max_{0})s".format(index)
+
+                elif inclusion.acq_min:
+                    esql += "end_datetime::date >= %(include_acq_min_{0})s".format(index)
+
+                elif inclusion.acq_max:
+                    esql += "end_datetime::date <= %(include_acq_max_{0})s".format(index)
+
+                # esql += ")"
+
+            # elif type(inclusion) is SatelliteDateCriteria:
+                # esql += " and (satellite.satellite_tag <> %(exclude_satellite_{0})s".format(index)
+                #
+                # if inclusion.acq_min and exclusion.acq_max:
+                #     esql += " or end_datetime not between %(exclude_acq_min_{0})s and %(exclude_acq_min_{0})s".format(index)
+                #
+                # elif inclusion.acq_min:
+                #     esql += " or end_datetime < %(exclude_acq_min_{0})s".format(index)
+                #
+                # elif inclusion.acq_max:
+                #     esql += " or end_datetime > %(exclude_acq_max_{0})s".format(index)
+                #
+                # esql += ")"
+                #
+                # sql += esql
+
+            else:
+                raise Exception("Not yet implemented")
+
+        if len(esql) > 0:
+            sql += " and (" + esql + ")"
+
+    sql += """
+        order by perc.x_index, perc.y_index, end_datetime {sort}, satellite asc
+    """.format(sort=sort.value)
+
+    params = {"tile_type": [TileType.PERCENTILE.value],
+              "tile_class": [tile_class.value for tile_class in TILE_CLASSES],
+              "satellite": [satellite.value for satellite in satellites],
+              "x": x, "y": y,
+              "acq_min": acq_min, "acq_max": acq_max,
+              "level_perc": ProcessingLevel.PERCENTILE_PRECIPITATION.value}
+
+
+    if exclude:
+        for index, exclusion in enumerate(exclude):
+            if type(exclusion) is DateCriteria:
+
+                if exclusion.acq_min:
+                    params["exclude_acq_min_{0}".format(index)] = exclusion.acq_min
+
+                if exclusion.acq_max:
+                    params["exclude_acq_max_{0}".format(index)] = exclusion.acq_max
+
+            elif type(exclusion) is SatelliteDateCriteria:
+
+                params["exclude_satellite_{0}".format(index)] = exclusion.satellite.value
+
+                if exclusion.acq_min:
+                    params["exclude_acq_min_{0}".format(index)] = exclusion.acq_min
+
+                if exclusion.acq_max:
+                    params["exclude_acq_max_{0}".format(index)] = exclusion.acq_max
+
+    if include:
+        for index, inclusion in enumerate(include):
+            if type(inclusion) is DateCriteria:
+
+                if inclusion.acq_min:
+                    params["include_acq_min_{0}".format(index)] = inclusion.acq_min
+
+                if inclusion.acq_max:
+                    params["include_acq_max_{0}".format(index)] = inclusion.acq_max
+
+            elif type(inclusion) is SatelliteDateCriteria:
+
+                params["include_satellite_{0}".format(index)] = inclusion.satellite.value
+
+                if exclusion.acq_min:
+                    params["include_acq_min_{0}".format(index)] = inclusion.acq_min
+
+                if exclusion.acq_max:
+                    params["include_acq_max_{0}".format(index)] = inclusion.acq_max
+
+    return sql, params
+
+
+def build_list_tiles_sql_and_params_precipitable_water_forecast(x, y, satellites, acq_min, acq_max, dataset_types, include=None, exclude=None, sort=SortType.ASC):
+
+    """
+    Build the SQL query string and parameters required to return the tiles matching the criteria for sentinel
+
+    :param x: X cell range
+    :type x: list[int]
+    :param y: Y cell range
+    :type y: list[int]
+    :param satellites: Satellites
+    :type satellites: list[datacube.api.model.Satellite]
+    :param acq_min: Acquisition date range
+    :type acq_min: datetime.datetime
+    :param acq_max: Acquisition date range
+    :type acq_max: datetime.datetime
+    :param dataset_types: Dataset types
+    :type dataset_types: list[datacube.api.model.DatasetType]
+    :param include: Inclusions - currently supports date range and satellite/date range
+    :type include: list[criteria] e.g. list[datacube.api.query.SatelliteDateExclusion]
+    :param exclude: Exclusions - currently supports date range and satellite/date range
+    :type exclude: list[criteria] e.g. list[datacube.api.query.SatelliteDateExclusion]
+    :param sort: Sort order
+    :type sort: datacube.api.query.SortType
+
+    :return: The SQL query and params
+    :rtype: (str, dict)
+    """
+
+    sql = """
+        select
+            acquisition.acquisition_id, satellite_tag as satellite, start_datetime, end_datetime,
+            extract(year from end_datetime) as end_datetime_year, extract(month from end_datetime) as end_datetime_month,
+            precip.x_index, precip.y_index, point(precip.x_index, precip.y_index) as xy,
+        """
+
+    sql += """
+            ARRAY[
+    """
+
+    sql += """
+            ['PRECIPITABLE_WATER_FORECAST', precip.tile_pathname]
+        """
+
+    sql += """
+            ] as datasets
+    """
+
+    sql += """
+        from acquisition
+        join satellite on satellite.satellite_id=acquisition.satellite_id
+        """
+
+    sql += """
+        join
+            (
+            select
+                dataset.acquisition_id, tile.dataset_id, tile.x_index, tile.y_index, tile.tile_pathname, tile.tile_type_id, tile.tile_class_id
+            from tile
+            join dataset on dataset.dataset_id=tile.dataset_id
+            where dataset.level_id = %(level_precip)s
+            ) as precip on precip.acquisition_id=acquisition.acquisition_id
+            """
+
+    sql += """
+        where
+            precip.tile_type_id = ANY(%(tile_type)s) and precip.tile_class_id = ANY(%(tile_class)s) -- mandatory
+            and satellite.satellite_tag = ANY(%(satellite)s)
+            and precip.x_index = ANY(%(x)s) and precip.y_index = ANY(%(y)s)
+            and end_datetime::date between %(acq_min)s and %(acq_max)s
+        """
+
+    if exclude:
+        for index, exclusion in enumerate(exclude):
+
+            esql = ""
+
+            if type(exclusion) is DateCriteria:
+                esql += " and ("
+
+                if exclusion.acq_min and exclusion.acq_max:
+                    esql += "end_datetime::date not between %(exclude_acq_min_{0})s and %(exclude_acq_max_{0})s".format(index)
+
+                elif exclusion.acq_min:
+                    esql += "end_datetime::date < %(exclude_acq_min_{0})s".format(index)
+
+                elif exclusion.acq_max:
+                    esql += "end_datetime::date > %(exclude_acq_max_{0})s".format(index)
+
+                esql += ")"
+
+                sql += esql
+
+            elif type(exclusion) is SatelliteDateCriteria:
+                esql += " and (satellite.satellite_tag <> %(exclude_satellite_{0})s".format(index)
+
+                if exclusion.acq_min and exclusion.acq_max:
+                    esql += " or end_datetime::date not between %(exclude_acq_min_{0})s and %(exclude_acq_max_{0})s".format(index)
+
+                elif exclusion.acq_min:
+                    esql += " or end_datetime::date < %(exclude_acq_min_{0})s".format(index)
+
+                elif exclusion.acq_max:
+                    esql += " or end_datetime::date > %(exclude_acq_max_{0})s".format(index)
+
+                esql += ")"
+
+                sql += esql
+
+    if include:
+        esql = ""
+
+        for index, inclusion in enumerate(include):
+
+            if type(inclusion) is DateCriteria:
+                esql += len(esql) > 0 and " or " or " "
+
+                if inclusion.acq_min and inclusion.acq_max:
+                    esql += "end_datetime::date between %(include_acq_min_{0})s and %(include_acq_max_{0})s".format(index)
+
+                elif inclusion.acq_min:
+                    esql += "end_datetime::date >= %(include_acq_min_{0})s".format(index)
+
+                elif inclusion.acq_max:
+                    esql += "end_datetime::date <= %(include_acq_max_{0})s".format(index)
+
+                # esql += ")"
+
+            # elif type(inclusion) is SatelliteDateCriteria:
+                # esql += " and (satellite.satellite_tag <> %(exclude_satellite_{0})s".format(index)
+                #
+                # if inclusion.acq_min and exclusion.acq_max:
+                #     esql += " or end_datetime not between %(exclude_acq_min_{0})s and %(exclude_acq_min_{0})s".format(index)
+                #
+                # elif inclusion.acq_min:
+                #     esql += " or end_datetime < %(exclude_acq_min_{0})s".format(index)
+                #
+                # elif inclusion.acq_max:
+                #     esql += " or end_datetime > %(exclude_acq_max_{0})s".format(index)
+                #
+                # esql += ")"
+                #
+                # sql += esql
+
+            else:
+                raise Exception("Not yet implemented")
+
+        if len(esql) > 0:
+            sql += " and (" + esql + ")"
+
+    sql += """
+        order by precip.x_index, precip.y_index, end_datetime {sort}, satellite asc
+    """.format(sort=sort.value)
+
+    params = {"tile_type": [TileType.FORECAST.value],
+              "tile_class": [tile_class.value for tile_class in TILE_CLASSES],
+              "satellite": [satellite.value for satellite in satellites],
+              "x": x, "y": y,
+              "acq_min": acq_min, "acq_max": acq_max,
+              "level_precip": ProcessingLevel.PRECIPITATABLE_WATER_FORECAST.value}
+
+
+    if exclude:
+        for index, exclusion in enumerate(exclude):
+            if type(exclusion) is DateCriteria:
+
+                if exclusion.acq_min:
+                    params["exclude_acq_min_{0}".format(index)] = exclusion.acq_min
+
+                if exclusion.acq_max:
+                    params["exclude_acq_max_{0}".format(index)] = exclusion.acq_max
+
+            elif type(exclusion) is SatelliteDateCriteria:
+
+                params["exclude_satellite_{0}".format(index)] = exclusion.satellite.value
+
+                if exclusion.acq_min:
+                    params["exclude_acq_min_{0}".format(index)] = exclusion.acq_min
+
+                if exclusion.acq_max:
+                    params["exclude_acq_max_{0}".format(index)] = exclusion.acq_max
+
+    if include:
+        for index, inclusion in enumerate(include):
+            if type(inclusion) is DateCriteria:
+
+                if inclusion.acq_min:
+                    params["include_acq_min_{0}".format(index)] = inclusion.acq_min
+
+                if inclusion.acq_max:
+                    params["include_acq_max_{0}".format(index)] = inclusion.acq_max
+
+            elif type(inclusion) is SatelliteDateCriteria:
+
+                params["include_satellite_{0}".format(index)] = inclusion.satellite.value
+
+                if exclusion.acq_min:
+                    params["include_acq_min_{0}".format(index)] = inclusion.acq_min
+
+                if exclusion.acq_max:
+                    params["include_acq_max_{0}".format(index)] = inclusion.acq_max
+
+    return sql, params
+
 
 
 # Tiles that we DON'T have

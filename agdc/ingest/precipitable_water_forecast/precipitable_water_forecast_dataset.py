@@ -151,7 +151,7 @@ class PrecipitableWaterForecastDataset(AbstractDataset):
 
         self._gcp_count = None
         self._mtl_text = None
-        self._processor_level = "Forecast"
+        self._processor_level = "Precipitable_Water_Forecast"
 
         AbstractDataset.__init__(self)
 

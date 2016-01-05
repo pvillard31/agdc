@@ -29,13 +29,15 @@ _log = logging.getLogger(__name__)
 
 
 class Satellite(Enum):
-    __order__ = "LS5 LS7 LS8 S1 SMOS"
+    __order__ = "LS5 LS7 LS8 S1 SMOS Percentile Forecast"
 
     LS5 = "LS5"
     LS7 = "LS7"
     LS8 = "LS8"
     S1 = "S1"
     SMOS = "SMOS"
+    Percentile = "Percentile"
+    Forecast = "Forecast"
 
 
 class Ls5TmBands(Enum):
@@ -186,9 +188,30 @@ class SMOSBands(Enum):
     MOISTURE = 1
     MOISTURE_DQX = 2
 
+class PercentileMoistureBands(Enum):
+    __order__ = "_65 _85 _95"
+
+    _65 = 1
+    _85 = 2
+    _95 = 3
+
+class PercentilePrecipitationBands(Enum):
+    __order__ = "_85 _95 _99"
+
+    _85 = 1
+    _95 = 2
+    _99 = 3
+
+class PrecipitableWaterForecastBands(Enum):
+    __order__ = "_1 _3 _5"
+
+    _1 = 1
+    _3 = 2
+    _5 = 3
+
 
 class DatasetType(Enum):
-    __order__ = "ARG25 PQ25 FC25 DSM DEM DEM_SMOOTHED DEM_HYDROLOGICALLY_ENFORCED WATER NDVI EVI SAVI TCI NBR SIGMA_VV MOISTURE"
+    __order__ = "ARG25 PQ25 FC25 DSM DEM DEM_SMOOTHED DEM_HYDROLOGICALLY_ENFORCED WATER NDVI EVI SAVI TCI NBR SIGMA_VV MOISTURE MOISTURE_PERCENTILE PRECIPITATION_PERCENTILE"
 
     ARG25 = "ARG25"
     PQ25 = "PQ25"
@@ -207,6 +230,9 @@ class DatasetType(Enum):
     MNDWI = "MNDWI"
     SIGMA_VV = "SIGMA_VV"
     MOISTURE = "MOISTURE"
+    MOISTURE_PERCENTILE = "MOISTURE_PERCENTILE"
+    PRECIPITATION_PERCENTILE = "PRECIPITATION_PERCENTILE"
+    PRECIPITABLE_WATER_FORECAST = "PRECIPITABLE_WATER_FORECAST"
 
 dataset_type_database = [DatasetType.ARG25, DatasetType.PQ25, DatasetType.FC25,
                          DatasetType.WATER,
@@ -438,7 +464,12 @@ BANDS = {
 
     (DatasetType.SIGMA_VV, Satellite.S1): S1Bands,
 
-    (DatasetType.MOISTURE, Satellite.SMOS): SMOSBands
+    (DatasetType.MOISTURE, Satellite.SMOS): SMOSBands,
+
+    (DatasetType.MOISTURE_PERCENTILE, Satellite.Percentile): PercentileMoistureBands,
+    (DatasetType.PRECIPITATION_PERCENTILE, Satellite.Percentile): PercentilePrecipitationBands,
+    (DatasetType.PRECIPITABLE_WATER_FORECAST, Satellite.Forecast): PrecipitableWaterForecastBands
+
 }
 
 
