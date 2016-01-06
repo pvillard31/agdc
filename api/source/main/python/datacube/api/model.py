@@ -209,6 +209,13 @@ class PrecipitableWaterForecastBands(Enum):
     _3 = 2
     _5 = 3
 
+class SMOSMetadataKeys(Enum):
+    __order__ = "Moisture_offset Moisture_scale_factor Moisture_Dqx_offset Moisture_Dqx_scale_factor"
+
+    Moisture_offset = "Soil_Moisture#add_offset"
+    Moisture_scale_factor = "Soil_Moisture#scale_factor"
+    Moisture_Dqx_offset = "Soil_Moisture_Dqx#add_offset"
+    Moisture_Dqx_scale_factor = "Soil_Moisture_Dqx#scale_factor"
 
 class DatasetType(Enum):
     __order__ = "ARG25 PQ25 FC25 DSM DEM DEM_SMOOTHED DEM_HYDROLOGICALLY_ENFORCED WATER NDVI EVI SAVI TCI NBR SIGMA_VV MOISTURE MOISTURE_PERCENTILE PRECIPITATION_PERCENTILE"

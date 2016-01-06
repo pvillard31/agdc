@@ -7,9 +7,9 @@ Ingester for landsat datasets.
 from __future__ import absolute_import
 from datetime import date
 
-from datacube.api.model import DatasetType, Satellite, SMOSBands
+from datacube.api.model import DatasetType, Satellite, SMOSBands, SMOSMetadataKeys
 from datacube.api.query import  list_tiles_as_list
-from datacube.api.utils import  get_dataset_data
+from datacube.api.utils import  get_dataset_data,get_dataset_metadata
 
 import logging
 
@@ -32,6 +32,10 @@ print "Number of tiles: {}".format(len(tiles))
 
 result_ds = tiles[0].datasets[DatasetType.MOISTURE]
 data = get_dataset_data(result_ds)
+metadata1 = data["metadata"][SMOSMetadataKeys.Moisture_offset.value]
+metadata2 = data["metadata"][SMOSMetadataKeys.Moisture_scale_factor.value]
+metadata3 = data["metadata"][SMOSMetadataKeys.Moisture_Dqx_offset.value]
+metadata4 = data["metadata"][SMOSMetadataKeys.Moisture_Dqx_scale_factor.value]
 
 moistureBand = data.get(SMOSBands.MOISTURE)
 moistureDqxBand = data.get(SMOSBands.MOISTURE_DQX)

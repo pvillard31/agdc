@@ -331,6 +331,9 @@ def read_dataset_data(dataset, bands=None, x=0, y=0, x_size=None, y_size=None):
         band.FlushCache()
         del band
 
+    if dataset.dataset_type == DatasetType.MOISTURE:
+        out['metadata']=raster.GetMetadata()
+
     raster.FlushCache()
     del raster
 

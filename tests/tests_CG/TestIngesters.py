@@ -22,7 +22,7 @@ from agdc.ingest.precipitable_water_forecast.core import PrecipitableWaterForeca
 logging.basicConfig(level=logging.DEBUG)
 _LOG = logging.getLogger('TestCG')
 
-sat = 8
+sat = 3
 
 from agdc.ingest import run_ingest
 
@@ -30,10 +30,10 @@ if sat == 1:
      run_ingest(LandsatIngester)
 
 if sat == 2:
-       run_ingest(SentinelIngester)
+    run_ingest(SentinelIngester)
 
 if sat == 3:
-        run_ingest(SmosIngester)
+     run_ingest(SmosIngester)
 
 if sat == 4:
     dataset = gdal.Open( "/data/agdc/S1_orthorect/water_after.img", GA_ReadOnly )

@@ -51,6 +51,11 @@ class SmosBandstack(AbstractBandstack):
         self.nodata_list = None
         self.vrt_name = None
         self.vrt_band_stack = None
+        self.dataset_mdd['Soil_Moisture#add_offset']= dataset._moisture_add_offset
+        self.dataset_mdd['Soil_Moisture#scale_factor']= dataset._moisture_scale_factor
+        self.dataset_mdd['Soil_Moisture_Dqx#add_offset']= dataset._moisture_dqx_add_offset
+        self.dataset_mdd['Soil_Moisture_Dqx#scale_factor']= dataset._moisture_dqx_scale_factor
+
 
     def buildvrt(self, temp_dir):
         """Given a dataset_record and corresponding dataset, build the vrt that
@@ -119,12 +124,8 @@ class SmosBandstack(AbstractBandstack):
         start_datetime = \
             self.dataset_mdd['start_datetime'].date().strftime('%Y%m%d')
         x_ref = self.dataset_mdd['x_ref']
-        y_ref = self.dataset_mdd['y_ref']
-        #TODO remove later
-        y_ref = 1234
-        vrt_band_stack_basename = '%s_%s_%s_%s_%03d_%03d.vrt' \
-            %(level_name, satellite, sensor, start_datetime, x_ref, y_ref)
-        #TODO spaces ? vrt_band_stack_basename = vrt_band_stack_basename.replace(" ", "_")
+        vrt_band_stack_basename = '%s_%s_%s_%s_%03d.vrt' \
+            %(level_name, satellite, sensor, start_datetime, x_ref)
         return os.path.join(vrt_dir, vrt_band_stack_basename)
 
     def add_metadata(self, vrt_filename):
@@ -137,8 +138,12 @@ class SmosBandstack(AbstractBandstack):
              'start_datetime': self.dataset_mdd['start_datetime'].isoformat(),
              'end_datetime': self.dataset_mdd['end_datetime'].isoformat(),
              'path': '%03d' % self.dataset_mdd['x_ref'],
-             #TODO remove later
-             'row': '%03d' % 1234 } #self.dataset_mdd['y_ref']}
+
+             'Soil_Moisture#add_offset': self.dataset_mdd['Soil_Moisture#add_offset'],
+             'Soil_Moisture#scale_factor': self.dataset_mdd['Soil_Moisture#scale_factor'],
+             'Soil_Moisture_Dqx#add_offset': self.dataset_mdd['Soil_Moisture_Dqx#add_offset'],
+             'Soil_Moisture_Dqx#scale_factor': self.dataset_mdd['Soil_Moisture_Dqx#scale_factor']
+             }
             )
         for band_info in self.band_dict.values():
             #Assume ordering file_number keys also orders the tile_layer

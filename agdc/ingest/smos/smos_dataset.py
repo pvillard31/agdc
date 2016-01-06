@@ -85,9 +85,15 @@ class SmosDataset(AbstractDataset):
         fileName, fileExtension = os.path.splitext(self._moisture_band_file)
 
         self._ds = gdal.Open(self._moisture_band_file, gdal.GA_ReadOnly)
-
-        if not self._ds:
+        self._dsDQX = gdal.Open(self._moisture_dqx_band_file, gdal.GA_ReadOnly)
+        if not self._ds or not self._dsDQX:
             raise DatasetError("Unable to open %s" % self.get_dataset_path())
+
+
+        self._moisture_add_offset=self._ds.GetMetadata()['Soil_Moisture#add_offset']
+        self._moisture_scale_factor=self._ds.GetMetadata()['Soil_Moisture#scale_factor']
+        self._moisture_dqx_add_offset=self._dsDQX.GetMetadata()['Soil_Moisture_Dqx#add_offset']
+        self._moisture_dqx_scale_factor=self._dsDQX.GetMetadata()['Soil_Moisture_Dqx#scale_factor']
 
         self._dataset_size = (os.path.getsize(self._moisture_band_file) + os.path.getsize(self._moisture_dqx_band_file))/1000
         
