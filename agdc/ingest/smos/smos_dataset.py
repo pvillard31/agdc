@@ -76,9 +76,9 @@ class SmosDataset(AbstractDataset):
         command = "find %s -name '*Soil_Moisture*' | sort" % dataset_path
         result = execute(command)['stdout'].split('\n')
 
-        self._moisture_band_file=result[1]
-        self._moisture_dqx_band_file=result[0]
-        self._dataset_path = os.path.abspath(dataset_path)
+        self._moisture_band_file=sorted(result)[1]
+        self._moisture_dqx_band_file=sorted(result)[2]
+	self._dataset_path = os.path.abspath(dataset_path)
 
 
 
@@ -88,7 +88,6 @@ class SmosDataset(AbstractDataset):
         self._dsDQX = gdal.Open(self._moisture_dqx_band_file, gdal.GA_ReadOnly)
         if not self._ds or not self._dsDQX:
             raise DatasetError("Unable to open %s" % self.get_dataset_path())
-
 
         self._moisture_add_offset=self._ds.GetMetadata()['Soil_Moisture#add_offset']
         self._moisture_scale_factor=self._ds.GetMetadata()['Soil_Moisture#scale_factor']
