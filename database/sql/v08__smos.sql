@@ -12,9 +12,6 @@ values (52, 52, 'SMOS', 'SMOS Sensor');
 insert into agdc.tile_type (tile_type_id, tile_type_name, crs, x_origin, y_origin, x_size, y_size, x_pixels, y_pixels, unit, file_format, file_extension, tile_directory, format_options)
 values (52, 'Unprojected WGS84 10-degree at 4 pixels/degree (for SMOS)', 'EPSG:4326', 0, 0, 10, 10, 40, 40, 'degree', 'GTiff', '.tif', 'SMOS', 'COMPRESS=LZW');
 
--- no need for a new band type, sigma VV is derived
---insert into band_type (band_type_id, band_type_name) values (31, 'RBQ');
-
 -- new bands
 -- resolution ??? => depends on the captor/images?
 -- wavelength ??? => depends on the captor? 

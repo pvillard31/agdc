@@ -13,11 +13,18 @@ values (54, 'Unprojected WGS84 10-degree at 4 pixels/degree (for forecast)', 'EP
 
 -- new bands
 insert into agdc.band (band_id, sensor_id, band_name, band_type_id, file_number, resolution, min_wavelength, max_wavelength, file_pattern, satellite_id, band_tag, band_number)
-values (540, 55, 'Precipitable_water_1d', 4, 1, 500, 14.0850000000000009, 14.3849999999999998, '.*f024_precipitable_water\.tif', 54, 'Precipitable_water_1d', 1);
+values (540, 55, 'Precipitable_water_24h', 4, 1, 500, 14.0850000000000009, 14.3849999999999998, '.*f024_precipitable_water\.tif', 54, 'Precipitable_water_24h', 1);
 insert into agdc.band (band_id, sensor_id, band_name, band_type_id, file_number, resolution, min_wavelength, max_wavelength, file_pattern, satellite_id, band_tag, band_number)
-values (541, 55, 'Precipitable_water_3d', 4, 2, 500, 14.0850000000000009, 14.3849999999999998, '.*f072_precipitable_water\.tif', 54, 'Precipitable_water_3d', 2);
+values (541, 55, 'Precipitable_water_30h', 4, 2, 500, 14.0850000000000009, 14.3849999999999998, '.*f030_precipitable_water\.tif', 54, 'Precipitable_water_30h', 2);
 insert into agdc.band (band_id, sensor_id, band_name, band_type_id, file_number, resolution, min_wavelength, max_wavelength, file_pattern, satellite_id, band_tag, band_number)
-values (542, 55, 'Precipitable_water_5d', 4, 3, 500, 14.0850000000000009, 14.3849999999999998, '.*f120_precipitable_water\.tif', 54, 'Precipitable_water_5d', 3);
+values (542, 55, 'Precipitable_water_72h', 4, 3, 500, 14.0850000000000009, 14.3849999999999998, '.*f072_precipitable_water\.tif', 54, 'Precipitable_water_72h', 3);
+insert into agdc.band (band_id, sensor_id, band_name, band_type_id, file_number, resolution, min_wavelength, max_wavelength, file_pattern, satellite_id, band_tag, band_number)
+values (543, 55, 'Precipitable_water_78h', 4, 4, 500, 14.0850000000000009, 14.3849999999999998, '.*f078_precipitable_water\.tif', 54, 'Precipitable_water_78h', 4);
+insert into agdc.band (band_id, sensor_id, band_name, band_type_id, file_number, resolution, min_wavelength, max_wavelength, file_pattern, satellite_id, band_tag, band_number)
+values (544, 55, 'Precipitable_water_120h', 4, 5, 500, 14.0850000000000009, 14.3849999999999998, '.*f120_precipitable_water\.tif', 54, 'Precipitable_water_120h', 5);
+insert into agdc.band (band_id, sensor_id, band_name, band_type_id, file_number, resolution, min_wavelength, max_wavelength, file_pattern, satellite_id, band_tag, band_number)
+values (545, 55, 'Precipitable_water_126h', 4, 6, 500, 14.0850000000000009, 14.3849999999999998, '.*f126_precipitable_water\.tif', 54, 'Precipitable_water_126h', 6);
+
 
 -- new processing level for Forecast
 insert into agdc.processing_level (level_id, level_name, nodata_value, resampling_method, level_description)
@@ -28,3 +35,6 @@ values (55, 'PRECIPITABLE_WATER_FORECAST', -32768, 'near', 'Precipitable Water F
 insert into agdc.band_source (tile_type_id, band_id, level_id, tile_layer) values (54, 540, 55, 1);
 insert into agdc.band_source (tile_type_id, band_id, level_id, tile_layer) values (54, 541, 55, 2);
 insert into agdc.band_source (tile_type_id, band_id, level_id, tile_layer) values (54, 542, 55, 3);
+insert into agdc.band_source (tile_type_id, band_id, level_id, tile_layer) values (54, 543, 55, 4);
+insert into agdc.band_source (tile_type_id, band_id, level_id, tile_layer) values (54, 544, 55, 5);
+insert into agdc.band_source (tile_type_id, band_id, level_id, tile_layer) values (54, 545, 55, 6);
