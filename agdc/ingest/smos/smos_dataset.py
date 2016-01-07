@@ -113,8 +113,8 @@ class SmosDataset(AbstractDataset):
 
         tree = etree.parse(metadata_file_path)
         startTime = tree.xpath("//*[local-name() = 'Precise_Validity_Start']")[0].text.split('UTC=')[1]
-        endTime = tree.xpath("//*[local-name() = 'Precise_Validity_Stop']")[0].text.split('UTC=')[1]
-
+        #endTime = tree.xpath("//*[local-name() = 'Precise_Validity_Stop']")[0].text.split('UTC=')[1]
+	endTime = startTime
 
         m = re.search('.*_\d{8}T\d{6}_\d{8}T\d{6}_(\d{3}).*_Soil_Moisture.*\.tif', os.path.basename(self._moisture_band_file))
         if m:
