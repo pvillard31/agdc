@@ -20,8 +20,8 @@ dataset_types = [DatasetType.MOISTURE]
 min_date = date(2015, 01, 01)
 max_date = date(2015, 12, 31)
 satellites = [Satellite(i) for i in ['SMOS']]
-x_cell = [8]
-y_cell = [2]
+x_cell = [0]
+y_cell = [4]
 
 tiles = list_tiles_as_list(x=x_cell, y=y_cell, acq_min=min_date,
                            acq_max=max_date,

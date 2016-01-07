@@ -66,7 +66,7 @@ class PrecipitableWaterForecastIngester(SourceFileIngester):
 
     def find_datasets(self, source_dir):
         """Return the source dir if it is a dataset.
-        Datasets are identified as a directory containing 3 tif files containing precipitable_water in their name
+        Datasets are identified as a directory containing 6 tif files containing precipitable_water in their name
         """
 
         _LOG.info('Searching for datasets in %s', source_dir)
@@ -76,7 +76,7 @@ class PrecipitableWaterForecastIngester(SourceFileIngester):
         assert not result['returncode'], \
             '"%s" failed: %s' % (command, result['stderr'])
 
-        if len(result['stdout'].split('\n')) == 4:
+        if len(result['stdout'].split('\n')) == 7:
             dataset_list = [source_dir]
         else:
             dataset_list = []

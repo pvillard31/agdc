@@ -22,7 +22,7 @@ from agdc.ingest.precipitable_water_forecast.core import PrecipitableWaterForeca
 logging.basicConfig(level=logging.DEBUG)
 _LOG = logging.getLogger('TestCG')
 
-sat = 3
+sat = 8
 
 from agdc.ingest import run_ingest
 

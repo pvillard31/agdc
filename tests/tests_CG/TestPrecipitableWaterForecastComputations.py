@@ -33,8 +33,11 @@ print "Number of tiles: {}".format(len(tiles))
 result_ds = tiles[0].datasets[DatasetType.PRECIPITABLE_WATER_FORECAST]
 data = get_dataset_data(result_ds)
 
-precipitableWaterForecast1Bands = data.get(PrecipitableWaterForecastBands._1)
-precipitableWaterForecast3Bands = data.get(PrecipitableWaterForecastBands._3)
-precipitableWaterForecast5Bands = data.get(PrecipitableWaterForecastBands._5)
+precipitableWaterForecast24Bands = data.get(PrecipitableWaterForecastBands._24)
+precipitableWaterForecast30Bands = data.get(PrecipitableWaterForecastBands._30)
+precipitableWaterForecast72Bands = data.get(PrecipitableWaterForecastBands._72)
+precipitableWaterForecast78Bands = data.get(PrecipitableWaterForecastBands._78)
+precipitableWaterForecast120Bands = data.get(PrecipitableWaterForecastBands._120)
+precipitableWaterForecast126Bands = data.get(PrecipitableWaterForecastBands._126)
 
 print "finished precipitable forecast"

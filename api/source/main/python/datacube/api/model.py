@@ -203,11 +203,14 @@ class PercentilePrecipitationBands(Enum):
     _99 = 3
 
 class PrecipitableWaterForecastBands(Enum):
-    __order__ = "_1 _3 _5"
+    __order__ = "_24 _30 _72 _78 _120 _126"
 
-    _1 = 1
-    _3 = 2
-    _5 = 3
+    _24 = 1
+    _30 = 2
+    _72 = 3
+    _78 = 4
+    _120 = 5
+    _126 = 6
 
 class SMOSMetadataKeys(Enum):
     __order__ = "Moisture_offset Moisture_scale_factor Moisture_Dqx_offset Moisture_Dqx_scale_factor"

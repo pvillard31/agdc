@@ -75,20 +75,26 @@ class PrecipitableWaterForecastDataset(AbstractDataset):
         self._dataset_path = os.path.abspath(dataset_path)
 
 
-        self._precipitable_water_forecast_1day_band_file=result[0]
-        self._precipitable_water_forecast_3days_band_file=result[1]
-        self._precipitable_water_forecast_5days_band_file=result[2]
+        self._precipitable_water_forecast_24h_band_file=result[0]
+        self._precipitable_water_forecast_30h_band_file=result[1]
+        self._precipitable_water_forecast_72h_band_file=result[2]
+        self._precipitable_water_forecast_78h_band_file=result[3]
+        self._precipitable_water_forecast_120h_band_file=result[4]
+        self._precipitable_water_forecast_126h_band_file=result[5]
 
-        fileName, fileExtension = os.path.splitext(self._precipitable_water_forecast_1day_band_file)
+        fileName, fileExtension = os.path.splitext(self._precipitable_water_forecast_24h_band_file)
 
-        self._ds = gdal.Open(self._precipitable_water_forecast_1day_band_file, gdal.GA_ReadOnly)
+        self._ds = gdal.Open(self._precipitable_water_forecast_24h_band_file, gdal.GA_ReadOnly)
 
         if not self._ds:
             raise DatasetError("Unable to open %s" % self.get_dataset_path())
 
-        self._dataset_size = (os.path.getsize(self._precipitable_water_forecast_1day_band_file) +
-                              os.path.getsize(self._precipitable_water_forecast_3days_band_file) +
-                              os.path.getsize(self._precipitable_water_forecast_5days_band_file))/1000
+        self._dataset_size = (os.path.getsize(self._precipitable_water_forecast_24h_band_file) +
+                              os.path.getsize(self._precipitable_water_forecast_30h_band_file) +
+                              os.path.getsize(self._precipitable_water_forecast_72h_band_file) +
+                              os.path.getsize(self._precipitable_water_forecast_78h_band_file) +
+                              os.path.getsize(self._precipitable_water_forecast_120h_band_file) +
+                              os.path.getsize(self._precipitable_water_forecast_126h_band_file))/1000
 
         LOGGER.debug('Transform = %s', self._ds.GetGeoTransform())
         LOGGER.debug('Projection = %s', self._ds.GetProjection())
