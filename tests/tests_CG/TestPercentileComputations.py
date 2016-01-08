@@ -34,8 +34,8 @@ result_ds = tiles[0].datasets[DatasetType.MOISTURE_PERCENTILE]
 data = get_dataset_data(result_ds)
 
 moisturePercentile65Band = data.get(PercentileMoistureBands._65)
-moisturePercentile85Band = data.get(PercentileMoistureBands._85)
-moisturePercentile95Band = data.get(PercentileMoistureBands._95)
+moisturePercentile85Band = data.get(PercentileMoistureBands._75)
+moisturePercentile95Band = data.get(PercentileMoistureBands._85)
 
 print "finished moisture percentile"
 

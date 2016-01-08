@@ -189,11 +189,11 @@ class SMOSBands(Enum):
     MOISTURE_DQX = 2
 
 class PercentileMoistureBands(Enum):
-    __order__ = "_65 _85 _95"
+    __order__ = "_65 _75 _85"
 
     _65 = 1
-    _85 = 2
-    _95 = 3
+    _75 = 2
+    _85 = 3
 
 class PercentilePrecipitationBands(Enum):
     __order__ = "_85 _95 _99"
