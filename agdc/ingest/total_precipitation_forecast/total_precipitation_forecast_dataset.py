@@ -102,10 +102,7 @@ class TotalPrecipitationForecastDataset(AbstractDataset):
         LOGGER.debug('RasterXSize = %s', self._ds.RasterXSize)
         LOGGER.debug('RasterYSize = %s', self._ds.RasterYSize)
 
-        folderNameDate=os.path.basename(self._dataset_path)
-
-        startTime=folderNameDate[:4]+'-'+folderNameDate[4:6]+'-'+folderNameDate[6:8]+'T'+folderNameDate[8:10]+":"\
-                  +folderNameDate[10:12]+":"+folderNameDate[12:14]
+        startTime=self._ds.GetMetadata()['NC_GLOBAL#_CoordinateModelRunDate'][:-1]
         completionDate=startTime
         endTime=startTime
 
