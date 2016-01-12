@@ -19,7 +19,7 @@
 """
     smos_dataset.py - dataset class for Sentinel datasets.
 
-    This is the implementation of the AbstractDataset class for Precipitable water forecast
+    This is the implementation of the AbstractDataset class for Total precipitation forecast
     datasets.
 """
 from __future__ import absolute_import
@@ -34,7 +34,7 @@ from eotools.execute import execute
 
 from agdc.cube_util import DatasetError
 from agdc.ingest import AbstractDataset
-from .precipitable_water_forecast_bandstack import PrecipitableWaterForecastBandstack
+from .total_precipitation_forecast_bandstack import TotalPrecipitationForecastBandstack
 
 #
 # Set up logger.
@@ -47,7 +47,7 @@ LOGGER = logging.getLogger(__name__)
 #
 
 
-class PrecipitableWaterForecastDataset(AbstractDataset):
+class TotalPrecipitationForecastDataset(AbstractDataset):
     """Dataset class for precipitable water forecast datasets."""
 
     # pylint: disable=too-many-public-methods
@@ -68,33 +68,33 @@ class PrecipitableWaterForecastDataset(AbstractDataset):
         """
 
         self._satellite_tag = "Forecast"
-        self._satellite_sensor = "Precipitable_water"
+        self._satellite_sensor = "Total_precipitation"
 
-        command = "find %s -name '*f[0-9][0-9][0-9]_precipitable_water.tif' | sort" % dataset_path
+        command = "find %s -name '*f[0-9][0-9][0-9]_total_precipitation.tif' | sort" % dataset_path
         result = execute(command)['stdout'].split('\n')
         self._dataset_path = os.path.abspath(dataset_path)
 
 
-        self._precipitable_water_forecast_24h_band_file=result[0]
-        self._precipitable_water_forecast_30h_band_file=result[1]
-        self._precipitable_water_forecast_72h_band_file=result[2]
-        self._precipitable_water_forecast_78h_band_file=result[3]
-        self._precipitable_water_forecast_120h_band_file=result[4]
-        self._precipitable_water_forecast_126h_band_file=result[5]
+        self._total_precipitation_forecast_24h_band_file=result[0]
+        self._total_precipitation_forecast_30h_band_file=result[1]
+        self._total_precipitation_forecast_72h_band_file=result[2]
+        self._total_precipitation_forecast_78h_band_file=result[3]
+        self._total_precipitation_forecast_120h_band_file=result[4]
+        self._total_precipitation_forecast_126h_band_file=result[5]
 
-        fileName, fileExtension = os.path.splitext(self._precipitable_water_forecast_24h_band_file)
+        fileName, fileExtension = os.path.splitext(self._total_precipitation_forecast_24h_band_file)
 
-        self._ds = gdal.Open(self._precipitable_water_forecast_24h_band_file, gdal.GA_ReadOnly)
+        self._ds = gdal.Open(self._total_precipitation_forecast_24h_band_file, gdal.GA_ReadOnly)
 
         if not self._ds:
             raise DatasetError("Unable to open %s" % self.get_dataset_path())
 
-        self._dataset_size = (os.path.getsize(self._precipitable_water_forecast_24h_band_file) +
-                              os.path.getsize(self._precipitable_water_forecast_30h_band_file) +
-                              os.path.getsize(self._precipitable_water_forecast_72h_band_file) +
-                              os.path.getsize(self._precipitable_water_forecast_78h_band_file) +
-                              os.path.getsize(self._precipitable_water_forecast_120h_band_file) +
-                              os.path.getsize(self._precipitable_water_forecast_126h_band_file))/1000
+        self._dataset_size = (os.path.getsize(self._total_precipitation_forecast_24h_band_file) +
+                              os.path.getsize(self._total_precipitation_forecast_30h_band_file) +
+                              os.path.getsize(self._total_precipitation_forecast_72h_band_file) +
+                              os.path.getsize(self._total_precipitation_forecast_78h_band_file) +
+                              os.path.getsize(self._total_precipitation_forecast_120h_band_file) +
+                              os.path.getsize(self._total_precipitation_forecast_126h_band_file))/1000
 
         LOGGER.debug('Transform = %s', self._ds.GetGeoTransform())
         LOGGER.debug('Projection = %s', self._ds.GetProjection())
@@ -157,7 +157,7 @@ class PrecipitableWaterForecastDataset(AbstractDataset):
 
         self._gcp_count = None
         self._mtl_text = None
-        self._processor_level = "Precipitable_Water_Forecast"
+        self._processor_level = "Total_Precipitation_Forecast"
 
         AbstractDataset.__init__(self)
 
@@ -459,4 +459,4 @@ class PrecipitableWaterForecastDataset(AbstractDataset):
         (described below), allowing the datacube to chop the relevent
         bands into tiles.
         """
-        return PrecipitableWaterForecastBandstack(self, band_dict)
+        return TotalPrecipitationForecastBandstack(self, band_dict)

@@ -31,12 +31,12 @@ from eotools.execute import execute
 
 from agdc.ingest import SourceFileIngester
 from agdc.cube_util import DatasetError
-from .precipitable_water_forecast_dataset import PrecipitableWaterForecastDataset
+from .total_precipitation_forecast_dataset import TotalPrecipitationForecastDataset
 
 _LOG = logging.getLogger(__name__)
 
 
-def _is_precipitable_water_forecast_file(filename):
+def _is_total_precipitation_forecast_file(filename):
     """
     Does the given file match a Precipitable water forecast tif file?
 
@@ -49,11 +49,11 @@ def _is_precipitable_water_forecast_file(filename):
     return filename.endswith(".tif")
 
 
-class PrecipitableWaterForecastIngester(SourceFileIngester):
+class TotalPrecipitationForecastIngester(SourceFileIngester):
     """Ingester class for Sentinel datasets."""
 
     def __init__(self, datacube=None, collection=None):
-        super(PrecipitableWaterForecastIngester, self).__init__(_is_precipitable_water_forecast_file, datacube, collection)
+        super(TotalPrecipitationForecastIngester, self).__init__(_is_total_precipitation_forecast_file, datacube, collection)
 
     def open_dataset(self, dataset_path):
         """Create and return a dataset object.
@@ -62,7 +62,7 @@ class PrecipitableWaterForecastIngester(SourceFileIngester):
            its metadata read.
         """
 
-        return PrecipitableWaterForecastDataset(dataset_path)
+        return TotalPrecipitationForecastDataset(dataset_path)
 
     def find_datasets(self, source_dir):
         """Return the source dir if it is a dataset.
@@ -70,7 +70,7 @@ class PrecipitableWaterForecastIngester(SourceFileIngester):
         """
 
         _LOG.info('Searching for datasets in %s', source_dir)
-        command = "find %s -name '*f[0-9][0-9][0-9]_precipitable_water.tif' | sort" % source_dir
+        command = "find %s -name '*f[0-9][0-9][0-9]_total_precipitation.tif' | sort" % source_dir
         _LOG.debug('executing "%s"', command)
         result = execute(command)
         assert not result['returncode'], \

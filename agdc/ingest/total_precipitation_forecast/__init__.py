@@ -23,11 +23,11 @@ from __future__ import absolute_import
 
 import logging
 
-from .core import PrecipitableWaterForecastIngester
+from .core import TotalPrecipitationForecastIngester
 
 _LOG = logging.getLogger(__name__)
 
 
 def cli():
     from agdc.ingest import run_ingest
-    run_ingest(PrecipitableWaterForecastIngester)
+    run_ingest(TotalPrecipitationForecastIngester)

@@ -1257,8 +1257,8 @@ def build_list_tiles_sql_and_params(x, y, satellites, acq_min, acq_max, dataset_
         sql, params = build_list_tiles_sql_and_params_moisture_percentile(x, y, satellites, acq_min, acq_max, dataset_types, include, exclude, sort)
     elif DatasetType.PRECIPITATION_PERCENTILE in dataset_types:
         sql, params = build_list_tiles_sql_and_params_precipitation_percentile(x, y, satellites, acq_min, acq_max, dataset_types, include, exclude, sort)
-    elif DatasetType.PRECIPITABLE_WATER_FORECAST in dataset_types:
-        sql, params = build_list_tiles_sql_and_params_precipitable_water_forecast(x, y, satellites, acq_min, acq_max, dataset_types, include, exclude, sort)
+    elif DatasetType.TOTAL_PRECIPITATION_FORECAST in dataset_types:
+        sql, params = build_list_tiles_sql_and_params_total_precipitation_forecast(x, y, satellites, acq_min, acq_max, dataset_types, include, exclude, sort)
     else:
         sql, params = build_list_tiles_sql_and_params_initial(x, y, satellites, acq_min, acq_max, dataset_types, include, exclude, sort)
     return sql, params
@@ -2447,7 +2447,7 @@ def build_list_tiles_sql_and_params_precipitation_percentile(x, y, satellites, a
     return sql, params
 
 
-def build_list_tiles_sql_and_params_precipitable_water_forecast(x, y, satellites, acq_min, acq_max, dataset_types, include=None, exclude=None, sort=SortType.ASC):
+def build_list_tiles_sql_and_params_total_precipitation_forecast(x, y, satellites, acq_min, acq_max, dataset_types, include=None, exclude=None, sort=SortType.ASC):
 
     """
     Build the SQL query string and parameters required to return the tiles matching the criteria for sentinel
@@ -2487,7 +2487,7 @@ def build_list_tiles_sql_and_params_precipitable_water_forecast(x, y, satellites
     """
 
     sql += """
-            ['PRECIPITABLE_WATER_FORECAST', precip.tile_pathname]
+            ['TOTAL_PRECIPITATION_FORECAST', precip.tile_pathname]
         """
 
     sql += """

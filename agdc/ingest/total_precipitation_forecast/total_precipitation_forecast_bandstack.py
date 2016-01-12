@@ -37,12 +37,12 @@ from agdc.ingest import AbstractBandstack
 from agdc.cube_util import DatasetError, create_directory
 
 
-class PrecipitableWaterForecastBandstack(AbstractBandstack):
-    """Landsat subclass of AbstractBandstack class"""
+class TotalPrecipitationForecastBandstack(AbstractBandstack):
+    """Precipitation forecast subclass of AbstractBandstack class"""
     def __init__(self, dataset, band_dict):
         """The bandstack allows for the construction of a list, or stack, of
         bands from the given dataset."""
-        super(PrecipitableWaterForecastBandstack, self).__init__(dataset.metadata_dict)
+        super(TotalPrecipitationForecastBandstack, self).__init__(dataset.metadata_dict)
         #Order the band_dict by the file number key
         self.dataset = dataset
         self.band_dict = \

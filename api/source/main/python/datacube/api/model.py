@@ -202,7 +202,7 @@ class PercentilePrecipitationBands(Enum):
     _95 = 2
     _99 = 3
 
-class PrecipitableWaterForecastBands(Enum):
+class TotalPrecipitationForecastBands(Enum):
     __order__ = "_24 _30 _72 _78 _120 _126"
 
     _24 = 1
@@ -221,7 +221,7 @@ class SMOSMetadataKeys(Enum):
     Moisture_Dqx_scale_factor = "Soil_Moisture_Dqx#scale_factor"
 
 class DatasetType(Enum):
-    __order__ = "ARG25 PQ25 FC25 DSM DEM DEM_SMOOTHED DEM_HYDROLOGICALLY_ENFORCED WATER NDVI EVI SAVI TCI NBR SIGMA_VV MOISTURE MOISTURE_PERCENTILE PRECIPITATION_PERCENTILE"
+    __order__ = "ARG25 PQ25 FC25 DSM DEM DEM_SMOOTHED DEM_HYDROLOGICALLY_ENFORCED WATER NDVI EVI SAVI TCI NBR SIGMA_VV MOISTURE MOISTURE_PERCENTILE PRECIPITATION_PERCENTILE TOTAL_PRECIPITATION_FORECAST"
 
     ARG25 = "ARG25"
     PQ25 = "PQ25"
@@ -242,7 +242,7 @@ class DatasetType(Enum):
     MOISTURE = "MOISTURE"
     MOISTURE_PERCENTILE = "MOISTURE_PERCENTILE"
     PRECIPITATION_PERCENTILE = "PRECIPITATION_PERCENTILE"
-    PRECIPITABLE_WATER_FORECAST = "PRECIPITABLE_WATER_FORECAST"
+    TOTAL_PRECIPITATION_FORECAST = "TOTAL_PRECIPITATION_FORECAST"
 
 dataset_type_database = [DatasetType.ARG25, DatasetType.PQ25, DatasetType.FC25,
                          DatasetType.WATER,
@@ -478,7 +478,7 @@ BANDS = {
 
     (DatasetType.MOISTURE_PERCENTILE, Satellite.Percentile): PercentileMoistureBands,
     (DatasetType.PRECIPITATION_PERCENTILE, Satellite.Percentile): PercentilePrecipitationBands,
-    (DatasetType.PRECIPITABLE_WATER_FORECAST, Satellite.Forecast): PrecipitableWaterForecastBands
+    (DatasetType.TOTAL_PRECIPITATION_FORECAST, Satellite.Forecast): TotalPrecipitationForecastBands
 
 }
 

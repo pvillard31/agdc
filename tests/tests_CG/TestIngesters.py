@@ -17,7 +17,7 @@ from agdc.ingest.sentinel1.core import SentinelIngester
 from agdc.ingest.smos.core import SmosIngester
 from agdc.ingest.moisture_percentile.core import MoisturePercentileIngester
 from agdc.ingest.precipitation_percentile.core import PrecipitationPercentileIngester
-from agdc.ingest.precipitable_water_forecast.core import PrecipitableWaterForecastIngester
+from agdc.ingest.total_precipitation_forecast.core import TotalPrecipitationForecastIngester
 
 logging.basicConfig(level=logging.DEBUG)
 _LOG = logging.getLogger('TestCG')
@@ -141,4 +141,4 @@ if sat == 7:
       run_ingest(PrecipitationPercentileIngester)
 
 if sat == 8:
-    run_ingest(PrecipitableWaterForecastIngester)
+    run_ingest(TotalPrecipitationForecastIngester)
