@@ -252,7 +252,7 @@ class PrecipitationPercentileDataset(AbstractDataset):
 
     def get_y_ref(self):
         """N/A for Sentinel."""
-        return None
+        return 0
 
     def get_start_datetime(self):
         """The start of the acquisition.

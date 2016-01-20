@@ -263,7 +263,7 @@ class SmosDataset(AbstractDataset):
 
     def get_y_ref(self):
         """N/A for SMOS."""
-        return None
+        return 0
 
     def get_start_datetime(self):
         """The start of the acquisition.

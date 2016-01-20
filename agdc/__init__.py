@@ -23,3 +23,7 @@ from agdc.stacker import Stacker
 from agdc.band_lookup import BandLookup
 
 __all__ = ['DataCube', 'Stacker', 'BandLookup']
+
+def delete_tiles():
+    from agdc import remove_tiles
+    remove_tiles.main()

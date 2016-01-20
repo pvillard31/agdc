@@ -246,7 +246,7 @@ where tile_type_id = %(tile_type_id)s
         # Set instance attributes for every value in command line arguments file
         for attribute_name in args.__dict__.keys():
             attribute_value = args.__dict__[attribute_name]
-            if attribute_value:
+            if attribute_value is not None:
                 self.__setattr__(attribute_name, attribute_value)
             
         self.create_directory(self.temp_dir)
