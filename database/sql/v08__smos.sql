@@ -11,6 +11,10 @@ values (52, 52, 'SMOS', 'SMOS Sensor');
 -- tile type name ???
 insert into agdc.tile_type (tile_type_id, tile_type_name, crs, x_origin, y_origin, x_size, y_size, x_pixels, y_pixels, unit, file_format, file_extension, tile_directory, format_options)
 values (52, 'Unprojected WGS84 10-degree at 4 pixels/degree (for SMOS)', 'EPSG:4326', 0, 0, 10, 10, 40, 40, 'degree', 'GTiff', '.tif', 'SMOS', 'COMPRESS=LZW');
+-- new tile_type for Sentinel 1
+-- tile type name ???
+insert into agdc.tile_type (tile_type_id, tile_type_name, crs, x_origin, y_origin, x_size, y_size, x_pixels, y_pixels, unit, file_format, file_extension, tile_directory, format_options)
+values (55, 'Unprojected WGS84 1-degree at 4000 pixels/degree (for SMOS)', 'EPSG:4326', 0, 0, 1, 1, 4000, 4000, 'degree', 'GTiff', '.tif', 'SMOS', 'COMPRESS=LZW');
 
 -- new bands
 -- resolution ??? => depends on the captor/images?
@@ -28,3 +32,5 @@ values (52, 'MOISTURE', -32768, 'near', 'SMOS Soil Moisture');
 -- new band source
 insert into agdc.band_source (tile_type_id, band_id, level_id, tile_layer) values (52, 520, 52, 1);
 insert into agdc.band_source (tile_type_id, band_id, level_id, tile_layer) values (52, 521, 52, 2);
+insert into agdc.band_source (tile_type_id, band_id, level_id, tile_layer) values (55, 520, 52, 1);
+insert into agdc.band_source (tile_type_id, band_id, level_id, tile_layer) values (55, 521, 52, 2);

@@ -9,7 +9,8 @@ values (55, 54, 'Total_precipitation', 'Total precipitation forecast');
 -- new tile_type for Forecast
 insert into agdc.tile_type (tile_type_id, tile_type_name, crs, x_origin, y_origin, x_size, y_size, x_pixels, y_pixels, unit, file_format, file_extension, tile_directory, format_options)
 values (54, 'Unprojected WGS84 10-degree at 4 pixels/degree (for forecast)', 'EPSG:4326', 0, 0, 10, 10, 40, 40, 'degree', 'GTiff', '.tif', 'Forecast', 'COMPRESS=LZW');
-
+insert into agdc.tile_type (tile_type_id, tile_type_name, crs, x_origin, y_origin, x_size, y_size, x_pixels, y_pixels, unit, file_format, file_extension, tile_directory, format_options)
+values (57, 'Unprojected WGS84 1-degree at 4000 pixels/degree (for forecast)', 'EPSG:4326', 0, 0, 1, 1, 4000, 4000, 'degree', 'GTiff', '.tif', 'Forecast', 'COMPRESS=LZW');
 
 -- new bands
 insert into agdc.band (band_id, sensor_id, band_name, band_type_id, file_number, resolution, min_wavelength, max_wavelength, file_pattern, satellite_id, band_tag, band_number)
@@ -38,3 +39,9 @@ insert into agdc.band_source (tile_type_id, band_id, level_id, tile_layer) value
 insert into agdc.band_source (tile_type_id, band_id, level_id, tile_layer) values (54, 543, 55, 4);
 insert into agdc.band_source (tile_type_id, band_id, level_id, tile_layer) values (54, 544, 55, 5);
 insert into agdc.band_source (tile_type_id, band_id, level_id, tile_layer) values (54, 545, 55, 6);
+insert into agdc.band_source (tile_type_id, band_id, level_id, tile_layer) values (57, 540, 55, 1);
+insert into agdc.band_source (tile_type_id, band_id, level_id, tile_layer) values (57, 541, 55, 2);
+insert into agdc.band_source (tile_type_id, band_id, level_id, tile_layer) values (57, 542, 55, 3);
+insert into agdc.band_source (tile_type_id, band_id, level_id, tile_layer) values (57, 543, 55, 4);
+insert into agdc.band_source (tile_type_id, band_id, level_id, tile_layer) values (57, 544, 55, 5);
+insert into agdc.band_source (tile_type_id, band_id, level_id, tile_layer) values (57, 545, 55, 6);

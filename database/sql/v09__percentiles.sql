@@ -13,7 +13,8 @@ values (54, 53, 'Precipitation', 'Precipitation percentile data');
 -- new tile_type for percentiles
 insert into agdc.tile_type (tile_type_id, tile_type_name, crs, x_origin, y_origin, x_size, y_size, x_pixels, y_pixels, unit, file_format, file_extension, tile_directory, format_options)
 values (53, 'Unprojected WGS84 10-degree at 4 pixels/degree (for percentiles)', 'EPSG:4326', 0, 0, 10, 10, 40, 40, 'degree', 'GTiff', '.tif', 'Percentiles', 'COMPRESS=LZW');
-
+insert into agdc.tile_type (tile_type_id, tile_type_name, crs, x_origin, y_origin, x_size, y_size, x_pixels, y_pixels, unit, file_format, file_extension, tile_directory, format_options)
+values (56, 'Unprojected WGS84 1-degree at 4000 pixels/degree (for percentiles)', 'EPSG:4326', 0, 0, 1, 1, 4000, 4000, 'degree', 'GTiff', '.tif', 'Percentiles', 'COMPRESS=LZW');
 
 -- new bands
 insert into agdc.band (band_id, sensor_id, band_name, band_type_id, file_number, resolution, min_wavelength, max_wavelength, file_pattern, satellite_id, band_tag, band_number)
@@ -43,3 +44,9 @@ insert into agdc.band_source (tile_type_id, band_id, level_id, tile_layer) value
 insert into agdc.band_source (tile_type_id, band_id, level_id, tile_layer) values (53, 534, 54, 1);
 insert into agdc.band_source (tile_type_id, band_id, level_id, tile_layer) values (53, 535, 54, 2);
 insert into agdc.band_source (tile_type_id, band_id, level_id, tile_layer) values (53, 536, 54, 3);
+insert into agdc.band_source (tile_type_id, band_id, level_id, tile_layer) values (56, 531, 53, 1);
+insert into agdc.band_source (tile_type_id, band_id, level_id, tile_layer) values (56, 532, 53, 2);
+insert into agdc.band_source (tile_type_id, band_id, level_id, tile_layer) values (56, 533, 53, 3);
+insert into agdc.band_source (tile_type_id, band_id, level_id, tile_layer) values (56, 534, 54, 1);
+insert into agdc.band_source (tile_type_id, band_id, level_id, tile_layer) values (56, 535, 54, 2);
+insert into agdc.band_source (tile_type_id, band_id, level_id, tile_layer) values (56, 536, 54, 3);

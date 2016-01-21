@@ -188,6 +188,51 @@ class DatasetRecord(object):
         self.__check_update_ok()
         self.db.update_dataset_record(self.dataset_dict)
 
+    def get_tile_x_range(self):
+        """Return the tile_x_range for the ingest as a (min, max) tuple.
+
+        If either value is not defined in the config file or cannot
+        be converted to an integer it will be returned as None.
+        """
+
+        try:
+            min_tile_x = int(self.datacube.min_tile_x)
+        except (AttributeError, ValueError):
+            min_tile_x = None
+
+        try:
+            max_tile_x = int(self.datacube.max_tile_x)
+        except (AttributeError, ValueError):
+            max_tile_x = None
+
+        return min_tile_x, max_tile_x
+
+    def get_tile_y_range(self):
+        """Return the tile_y_range for the ingest as a (min, max) tuple.
+
+        If either value is not defined in the config file or cannot
+        be converted to an integer it will be returned as None.
+        """
+
+        try:
+            min_tile_y = int(self.datacube.min_tile_y)
+        except (AttributeError, ValueError):
+            min_tile_y = None
+
+        try:
+            max_tile_y = int(self.datacube.max_tile_y)
+        except (AttributeError, ValueError):
+            max_tile_y = None
+
+        return min_tile_y, max_tile_y
+
+    def filter_to_keep_tiles(self, tile_footprint, min_tile_x, max_tile_x, min_tile_y, max_tile_y):
+        keep = (min_tile_x is None or tile_footprint[0] >= min_tile_x) and \
+               (max_tile_x is None or tile_footprint[0] <= max_tile_x) and \
+               (min_tile_y is None or tile_footprint[1] >= min_tile_y) and \
+               (max_tile_y is None or tile_footprint[1] <= max_tile_y)
+        return keep
+
     def make_tiles(self, tile_type_id, band_stack):
         """Tile the dataset, returning a list of tile_content objects.
 
@@ -198,21 +243,31 @@ class DatasetRecord(object):
         tile_footprint_list = sorted(self.get_coverage(tile_type_id))
         LOGGER.info('%d tile footprints cover dataset', len(tile_footprint_list))
 
+        min_tile_x, max_tile_x = self.get_tile_x_range()
+        min_tile_y, max_tile_y = self.get_tile_y_range()
+        filtered = 0
         for tile_footprint in tile_footprint_list:
-            tile_contents = self.collection.create_tile_contents(
-                tile_type_id,
-                tile_footprint,
-                band_stack
-                )
-            tile_contents.reproject()
+            # filter files we want
+            if self.filter_to_keep_tiles(tile_footprint, min_tile_x, max_tile_x, min_tile_y, max_tile_y):
+                tile_contents = self.collection.create_tile_contents(
+                    tile_type_id,
+                    tile_footprint,
+                    band_stack
+                    )
+                tile_contents.reproject()
 
-            if tile_contents.has_data():
-                tile_list.append(tile_contents)
+                if tile_contents.has_data():
+                    tile_list.append(tile_contents)
+                else:
+                    tile_contents.remove()
             else:
-                tile_contents.remove()
+                filtered += 1
 
         LOGGER.info('%d non-empty tiles created', len(tile_list))
+        LOGGER.info('%d tiles filtered because they are outside of the target tiles', filtered)
         return tile_list
+
+
 
     def store_tiles(self, tile_list):
         """Store tiles in the database and file store.
