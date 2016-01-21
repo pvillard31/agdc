@@ -45,13 +45,17 @@ TILE_CLASSES = [TileClass.SINGLE, TileClass.MOSAIC]
 
 
 class TileType(Enum):
-    __order__ = "ONE_DEGREE SENTINEL SMOS PERCENTILE FORECAST"
+    __order__ = "ONE_DEGREE SENTINEL SMOS PERCENTILE FORECAST SMOS_HR PERCENTILE_HR FORECAST_HR"
 
     ONE_DEGREE = 1
     SENTINEL = 51
     SMOS = 52
     PERCENTILE = 53
     FORECAST = 54
+    SMOS_HR = 55
+    PERCENTILE_HR = 56
+    FORECAST_HR = 57
+
 
 
 TILE_TYPE = TileType.ONE_DEGREE
@@ -1988,7 +1992,7 @@ def build_list_tiles_sql_and_params_smos(x, y, satellites, acq_min, acq_max, dat
         order by moist.x_index, moist.y_index, end_datetime {sort}, satellite asc
     """.format(sort=sort.value)
 
-    params = {"tile_type": [TileType.SMOS.value],
+    params = {"tile_type": [TileType.SMOS.value, TileType.SMOS_HR.value],
               "tile_class": [tile_class.value for tile_class in TILE_CLASSES],
               "satellite": [satellite.value for satellite in satellites],
               "x": x, "y": y,
@@ -2192,7 +2196,7 @@ def build_list_tiles_sql_and_params_moisture_percentile(x, y, satellites, acq_mi
         order by perc.x_index, perc.y_index, end_datetime {sort}, satellite asc
     """.format(sort=sort.value)
 
-    params = {"tile_type": [TileType.PERCENTILE.value],
+    params = {"tile_type": [TileType.PERCENTILE.value, TileType.PERCENTILE_HR.value],
               "tile_class": [tile_class.value for tile_class in TILE_CLASSES],
               "satellite": [satellite.value for satellite in satellites],
               "x": x, "y": y,
@@ -2396,7 +2400,7 @@ def build_list_tiles_sql_and_params_precipitation_percentile(x, y, satellites, a
         order by perc.x_index, perc.y_index, end_datetime {sort}, satellite asc
     """.format(sort=sort.value)
 
-    params = {"tile_type": [TileType.PERCENTILE.value],
+    params = {"tile_type": [TileType.PERCENTILE.value, TileType.PERCENTILE_HR.value],
               "tile_class": [tile_class.value for tile_class in TILE_CLASSES],
               "satellite": [satellite.value for satellite in satellites],
               "x": x, "y": y,
@@ -2600,7 +2604,7 @@ def build_list_tiles_sql_and_params_total_precipitation_forecast(x, y, satellite
         order by precip.x_index, precip.y_index, end_datetime {sort}, satellite asc
     """.format(sort=sort.value)
 
-    params = {"tile_type": [TileType.FORECAST.value],
+    params = {"tile_type": [TileType.FORECAST.value, TileType.FORECAST_HR.value],
               "tile_class": [tile_class.value for tile_class in TILE_CLASSES],
               "satellite": [satellite.value for satellite in satellites],
               "x": x, "y": y,
