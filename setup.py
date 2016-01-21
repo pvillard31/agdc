@@ -51,7 +51,7 @@ setup(name='agdc',
               'agdc-ingest-smos = agdc.ingest.smos:cli',
               'agdc-ingest-percentile-moisture = agdc.ingest.moisture_percentile:cli',
               'agdc-ingest-percentile-precipitation = agdc.ingest.precipitation_percentile:cli',
-              'agdc-ingest-precipitable-water-forecast = agdc.ingest.total_precipitation_forecast:cli',
+              'agdc-ingest-total-precipitation-forecast = agdc.ingest.total_precipitation_forecast:cli',
 	      'agdc-delete-data = agdc:delete_tiles'
           ]
       },
