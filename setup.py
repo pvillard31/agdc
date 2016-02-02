@@ -56,7 +56,7 @@ setup(name='agdc',
           ]
       },
       install_requires=[
-                  'eotools == 0.4',
+                  'eotools >= 0.4',
                   'psycopg2 >= 2.5',
                   'gdal',
                   'numexpr',
