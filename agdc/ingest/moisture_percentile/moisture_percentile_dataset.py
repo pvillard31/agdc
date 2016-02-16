@@ -100,10 +100,11 @@ class MoisturePercentileDataset(AbstractDataset):
         month=re.search('.*PSM(\d+).*tif', self._moisture_percentile_65_band_file).group(1)
         startTime="2000-"+month+"-01T00:00:00.000"
         completionDate="2000-"+month+"-15 00:00:00.000"
-        if (month==12):
-            endTime="2001-01-01T00:00:00.000"
-        else:
-            endTime="2000-"+str(int(month)+1).zfill(2)+"-01T00:00:00.000"
+        endTime = startTime
+        #if (month==12):
+        #    endTime="2001-01-01T00:00:00.000"
+        #else:
+        #    endTime="2000-"+str(int(month)+1).zfill(2)+"-01T00:00:00.000"
 
 
         self._rangeendingdate = endTime.split('T')[0]
