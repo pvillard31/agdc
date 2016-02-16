@@ -100,7 +100,7 @@ class PrecipitationPercentileDataset(AbstractDataset):
         month=re.search('.*_PR(\d+).*tif', self._precipitation_percentile_85_band_file).group(1)
         startTime="2000-"+month+"-01T00:00:00.000"
         completionDate="2000-"+month+"-15 00:00:00.000"
-        endTime = completionDate
+        endTime = startTime
         #if (month==12):
         #    endTime="2001-01-01T00:00:00.000"
         #else:
